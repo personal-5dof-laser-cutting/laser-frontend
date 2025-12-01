@@ -4,12 +4,15 @@
 requirements:
 have Node.js & npm installed
 
+
 within the directory:
 
-install dependencies with 
+install dependencies with:
+
 npm i
 
-then
+then:
+
 npm run dev
 
 and follow the link 
