@@ -17,4 +17,5 @@ export interface CuttingParameters {
   thickness: number;
   speed: number;
   power: number;
+  laserActive: boolean;
 }
