@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CuttingParameters, MaterialOption } from "@/types/svg";
 import { Play, Scan } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface ControlPanelProps {
   parameters: CuttingParameters;
@@ -130,6 +131,21 @@ export const ControlPanel = ({
               onParametersChange({
                 ...parameters,
                 power: clampedValue,
+              });
+            }}
+            disabled={disabled}
+          />
+        </div>
+
+        <div className="flex items-center justify-between rounded-md border px-3 py-2">
+          <Label htmlFor="laser-active">Laser Active</Label>
+          <Switch
+            id="laser-active"
+            defaultChecked
+            onCheckedChange={(e) => {
+              onParametersChange({
+                ...parameters,
+                laserActive: e
               });
             }}
             disabled={disabled}
