@@ -152,6 +152,21 @@ export const ControlPanel = ({
           />
         </div>
 
+        <div className="flex items-center justify-between rounded-md border px-3 py-2">
+          <Label htmlFor="optimize-cuts">Optimize cuts</Label>
+          <Switch
+            id="optimize-cuts"
+            defaultChecked
+            onCheckedChange={(e) => {
+              onParametersChange({
+                ...parameters,
+                optimizeCuts: e
+              });
+            }}
+            disabled={disabled}
+          />
+        </div>
+
         <div className="pt-4 space-y-3">
           <Button
             onClick={onTraceOutline}

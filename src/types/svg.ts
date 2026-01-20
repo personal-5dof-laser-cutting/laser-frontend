@@ -18,4 +18,5 @@ export interface CuttingParameters {
   speed: number;
   power: number;
   laserActive: boolean;
+  optimizeCuts: boolean;
 }
