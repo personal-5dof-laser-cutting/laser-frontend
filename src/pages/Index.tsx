@@ -14,7 +14,8 @@ const Index = () => {
     thickness: 3,
     speed: 50,
     power: 80,
-    laserActive: true
+    laserActive: true,
+    optimizeCuts: true,
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
