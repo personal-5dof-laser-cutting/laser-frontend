@@ -58,7 +58,7 @@ const Index = () => {
     console.log("Parsed paths:", parsedPaths);
   };
 
-  const handleStartCutting = () => {
+  const handleStartCutting = async () => {
     if (!svgContent) {
       toast.error("Please load an SVG file first");
       return;
@@ -66,6 +66,30 @@ const Index = () => {
     toast.success("Starting cutting operation...");
     console.log("Start cutting with parameters:", parameters);
     console.log("Parsed paths:", parsedPaths);
+    const response = await fetch("http://127.0.0.1:8000/generate_gcode", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        material_thickness: parameters["thickness"],
+        optimize: parameters["optimizeCuts"],
+        laser_off: !parameters["laserActive"],
+        cut_speed: parameters["speed"],
+        svg: svgContent,
+      })
+    });
+    if (response.ok) {
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl
+      link.download = "model.gcode";
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(downloadUrl)
+    }
   };
 
   const handleRemoveFile = () => {
