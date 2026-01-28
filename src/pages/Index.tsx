@@ -47,6 +47,50 @@ const Index = () => {
       toast.info(`Parsed ${paths.length} elements with data attributes`);
     }
   }, []);
+  let ws: WebSocket, reconnectDelay: number
+
+  function handleMessage(msg: any) {
+      switch (msg.type) {
+        case "update":
+          updateProgress(msg.content);
+          break;
+        
+        case "result":
+          console.log("Got result:\n" + msg.content);
+          break;
+
+        default:
+          console.log(msg.type + " not implemented");
+      }
+  }
+
+  function connectWebsocket() {
+    ws = new WebSocket("ws://localhost:8000/ws/cut_svg")
+
+    ws.onopen = () => {
+      console.log("frontend connected"),
+      reconnectDelay = 1000;
+    }
+
+    ws.onmessage = (e) => {
+      const msg = JSON.parse(e.data)
+      handleMessage(msg)
+    }
+
+    ws.onclose = () => {
+      console.log("frontend disconnected, retrying...");
+      setTimeout(connectWebsocket, reconnectDelay);
+      reconnectDelay = Math.min(reconnectDelay * 2, 10000);
+    }
+
+    ws.onerror = () => ws.close();
+  }
+
+  connectWebsocket();
+
+  function updateProgress(progress: string) {
+    console.log(progress)
+  }
 
   const handleTraceOutline = () => {
     if (!svgContent) {
@@ -65,6 +109,30 @@ const Index = () => {
     }
     toast.success("Starting cutting operation...");
     console.log("Start cutting with parameters:", parameters);
+    console.log("Parsed paths:", parsedPaths);
+
+    ws.send(JSON.stringify({
+        material_thickness: parameters["thickness"],
+        optimize: parameters["optimizeCuts"],
+        laser_off: !parameters["laserActive"],
+        cut_speed: parameters["speed"],
+        svg: svgContent,
+      }));
+  }
+
+  function abortCut() {
+    ws.send(JSON.stringify({
+      type: "abort"
+    }))
+  }
+
+  const handleGenerateGCode = async () => {
+    if (!svgContent) {
+      toast.error("Please load an SVG file first");
+      return;
+    }
+    toast.success("Starting generating gcode...");
+    console.log("Start generating with parameters:", parameters);
     console.log("Parsed paths:", parsedPaths);
     const response = await fetch("http://127.0.0.1:8000/generate_gcode", {
       method: "POST",
