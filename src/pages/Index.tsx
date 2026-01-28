@@ -68,18 +68,20 @@ const Index = () => {
     ws = new WebSocket("ws://localhost:8000/ws/cut_svg")
 
     ws.onopen = () => {
-      console.log("frontend connected"),
+      console.log("frontend connected");
       reconnectDelay = 1000;
     }
 
     ws.onmessage = (e) => {
-      const msg = JSON.parse(e.data)
-      handleMessage(msg)
+      console.log("message recieved");
+      const msg = JSON.parse(e.data);
+      handleMessage(msg);
     }
 
     ws.onclose = () => {
-      console.log("frontend disconnected, retrying...");
+      console.log("frontend disconnected");
       setTimeout(connectWebsocket, reconnectDelay);
+      console.log("retrying...")
       reconnectDelay = Math.min(reconnectDelay * 2, 10000);
     }
 
@@ -120,7 +122,7 @@ const Index = () => {
       }));
   }
 
-  function abortCut() {
+  const abortCut = async () => {
     ws.send(JSON.stringify({
       type: "abort"
     }))
