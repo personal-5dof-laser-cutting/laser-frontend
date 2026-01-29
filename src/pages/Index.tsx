@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { SVGEditor } from "@/components/LaserCutter/SVGEditor";
 import { ControlPanel } from "@/components/LaserCutter/ControlPanel";
 import { CuttingParameters, SVGPathData } from "@/types/svg";
@@ -17,6 +18,9 @@ const Index = () => {
     laserActive: true,
     optimizeCuts: true,
   });
+  const [progressValue, setProgressValue] = useState<number>(0);
+  const [showProgress, setShowProgress] = useState<boolean>(false);
+  const [progressText, setProgressText] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +95,28 @@ const Index = () => {
   connectWebsocket();
 
   function updateProgress(progress: string) {
-    console.log(progress)
+    console.log(progress);  
+    const percentMatch = progress.match(/(\d+(?:\.\d+)?)%/);
+    if (percentMatch) {
+      const percentage = parseFloat(percentMatch[1]);
+      setProgressValue(percentage);
+      setShowProgress(true);
+      setProgressText(progress);
+      
+      // hide bar when done
+      if (percentage >= 100) {
+        setTimeout(() => {
+          setShowProgress(false);
+          setProgressValue(0);
+          setProgressText("");
+        }, 2000);
+      }
+    } else {
+      // no percentage found, just text
+      setShowProgress(true);
+      setProgressText(progress);
+      setProgressValue(0);
+    }
   }
 
   const handleTraceOutline = () => {
@@ -112,6 +137,10 @@ const Index = () => {
     toast.success("Starting cutting operation...");
     console.log("Start cutting with parameters:", parameters);
     console.log("Parsed paths:", parsedPaths);
+    // show progress on bar pop up
+    setShowProgress(true);
+    setProgressValue(0);
+    setProgressText("Initializing cut...");
 
     ws.send(JSON.stringify({
         material_thickness: parameters["thickness"],
@@ -125,7 +154,13 @@ const Index = () => {
   const abortCut = async () => {
     ws.send(JSON.stringify({
       type: "abort"
-    }))
+    }));
+    
+    // hiding the progress bar on abort
+    setShowProgress(false);
+    setProgressValue(0);
+    setProgressText("");
+    toast.info("Cut operation aborted");
   }
 
   const handleGenerateGCode = async () => {
@@ -231,6 +266,28 @@ const Index = () => {
           </div>
         </div>
       </div>
+            
+      {showProgress && (
+        <div className="fixed bottom-4 right-4 bg-card border rounded-lg p-4 shadow-lg min-w-[300px] z-50">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium">Progress</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setShowProgress(false);
+                setProgressValue(0);
+                setProgressText("");
+              }}
+              className="h-6 w-6 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <Progress value={progressValue} className="mb-2" />
+          <p className="text-xs text-muted-foreground">{progressText}</p>
+        </div>
+      )}
     </div>
   );
 };
