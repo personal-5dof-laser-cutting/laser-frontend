@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { SVGEditor } from "@/components/LaserCutter/SVGEditor";
@@ -6,6 +6,7 @@ import { ControlPanel } from "@/components/LaserCutter/ControlPanel";
 import { CuttingParameters, SVGPathData } from "@/types/svg";
 import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import { WSMessage, wsService } from "@/services/websocket";
 
 const Index = () => {
   const [svgContent, setSvgContent] = useState<string | null>(null);
@@ -22,6 +23,10 @@ const Index = () => {
   const [showProgress, setShowProgress] = useState<boolean>(false);
   const [progressText, setProgressText] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    wsService.connectWebsocket(handleMessage);;
+  }, []);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -51,9 +56,8 @@ const Index = () => {
       toast.info(`Parsed ${paths.length} elements with data attributes`);
     }
   }, []);
-  let ws: WebSocket, reconnectDelay: number
 
-  function handleMessage(msg: any) {
+  function handleMessage(msg: WSMessage) {
       switch (msg.type) {
         case "update":
           updateProgress(msg.content);
@@ -67,32 +71,6 @@ const Index = () => {
           console.log(msg.type + " not implemented");
       }
   }
-
-  function connectWebsocket() {
-    ws = new WebSocket("ws://localhost:8000/ws/cut_svg")
-
-    ws.onopen = () => {
-      console.log("frontend connected");
-      reconnectDelay = 1000;
-    }
-
-    ws.onmessage = (e) => {
-      console.log("message recieved");
-      const msg = JSON.parse(e.data);
-      handleMessage(msg);
-    }
-
-    ws.onclose = () => {
-      console.log("frontend disconnected");
-      setTimeout(connectWebsocket, reconnectDelay);
-      console.log("retrying...")
-      reconnectDelay = Math.min(reconnectDelay * 2, 10000);
-    }
-
-    ws.onerror = () => ws.close();
-  }
-
-  connectWebsocket();
 
   function updateProgress(progress: string) {
     console.log(progress);  
@@ -142,7 +120,7 @@ const Index = () => {
     setProgressValue(0);
     setProgressText("Initializing cut...");
 
-    ws.send(JSON.stringify({
+    wsService.send(JSON.stringify({
         material_thickness: parameters["thickness"],
         optimize: parameters["optimizeCuts"],
         laser_off: !parameters["laserActive"],
@@ -152,7 +130,7 @@ const Index = () => {
   }
 
   const abortCut = async () => {
-    ws.send(JSON.stringify({
+    wsService.send(JSON.stringify({
       type: "abort"
     }));
     
