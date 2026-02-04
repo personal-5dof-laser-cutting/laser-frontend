@@ -12,11 +12,16 @@ export interface MaterialOption {
   name: string;
 }
 
+export interface ScalingOption {
+  id: string;
+  name: string;
+}
+
 export interface CuttingParameters {
   material: string;
-  thickness: number;
-  speed: number;
-  power: number;
+  material_thickness: number;
+  cut_speed: number;
   laserActive: boolean;
   optimizeCuts: boolean;
+  svg_scaling: string;
 }
