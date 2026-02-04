@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CuttingParameters, MaterialOption } from "@/types/svg";
+import { CuttingParameters, MaterialOption, ScalingOption } from "@/types/svg";
 import { Play, Scan } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
@@ -23,6 +23,10 @@ interface ControlPanelProps {
 
 const materials: MaterialOption[] = [
   { id: "wood", name: "Wood" },
+];
+const scalings: ScalingOption[] = [
+  { id: "mm", name: "Millimeter" },
+  { id: "illustrator", name: "Adobe Illustrator" },
 ];
 
 export const ControlPanel = ({
@@ -61,13 +65,35 @@ export const ControlPanel = ({
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="scaling">SVG Scaling</Label>
+          <Select
+            value={parameters.svg_scaling}
+            onValueChange={(value) =>
+              onParametersChange({ ...parameters, svg_scaling: value })
+            }
+            disabled={disabled}
+          >
+            <SelectTrigger id="scaling">
+              <SelectValue placeholder="Select scaling" />
+            </SelectTrigger>
+            <SelectContent>
+              {scalings.map((scaling) => (
+                <SelectItem key={scaling.id} value={scaling.id}>
+                  {scaling.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="thickness">Thickness (mm)</Label>
           <Input
             id="thickness"
             type="number"
             min="0"
             step="0.1"
-            value={parameters.thickness || ""}
+            value={parameters.material_thickness || ""}
             autoComplete="off"
             onKeyDown={(e) => {
               if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-' || e.key === '.') {
@@ -78,7 +104,7 @@ export const ControlPanel = ({
               const value = parseFloat(e.target.value.replace(',', '.'));
               onParametersChange({
                 ...parameters,
-                thickness: isNaN(value) ? 0 : value,
+                material_thickness: isNaN(value) ? 0 : value,
               });
             }}
             disabled={disabled}
@@ -86,14 +112,14 @@ export const ControlPanel = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="speed">Speed (%)</Label>
+          <Label htmlFor="speed">Speed (mm/s)</Label>
           <Input
             id="speed"
             type="number"
             min="0"
             max="100"
             step="1"
-            value={parameters.speed || ""}
+            value={parameters.cut_speed || ""}
             onKeyDown={(e) => {
               if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') {
                 e.preventDefault();
@@ -104,33 +130,7 @@ export const ControlPanel = ({
               const clampedValue = isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100);
               onParametersChange({
                 ...parameters,
-                speed: clampedValue,
-              });
-            }}
-            disabled={disabled}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="power">Power (%)</Label>
-          <Input
-            id="power"
-            type="number"
-            min="0"
-            max="100"
-            step="1"
-            value={parameters.power || ""}
-            onKeyDown={(e) => {
-              if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') {
-                e.preventDefault();
-              }
-            }}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              const clampedValue = isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100);
-              onParametersChange({
-                ...parameters,
-                power: clampedValue,
+                cut_speed: clampedValue,
               });
             }}
             disabled={disabled}

@@ -13,11 +13,11 @@ const Index = () => {
   const [parsedPaths, setParsedPaths] = useState<SVGPathData[]>([]);
   const [parameters, setParameters] = useState<CuttingParameters>({
     material: "wood",
-    thickness: 3,
-    speed: 50,
-    power: 80,
+    material_thickness: 3,
+    cut_speed: 5,
     laserActive: true,
     optimizeCuts: true,
+    svg_scaling: "mm",
   });
   const [progressValue, setProgressValue] = useState<number>(0);
   const [showProgress, setShowProgress] = useState<boolean>(false);
@@ -58,6 +58,7 @@ const Index = () => {
   }, []);
 
   function handleMessage(msg: WSMessage) {
+    console.log("Message:\n")
       switch (msg.type) {
         case "update":
           updateProgress(msg.content);
@@ -67,8 +68,12 @@ const Index = () => {
           console.log("Got result:\n" + msg.content);
           break;
 
+        case "error":
+          console.error("Recieved WS error:\n", msg.content);
+          break;
+
         default:
-          console.log(msg.type + " not implemented");
+          console.log("WSMessage type " + msg.type + " not implemented");
       }
   }
 
@@ -121,11 +126,13 @@ const Index = () => {
     setProgressText("Initializing cut...");
 
     wsService.send(JSON.stringify({
-        material_thickness: parameters["thickness"],
+      material: parameters["material"],
+        material_thickness: parameters["material_thickness"],
         optimize: parameters["optimizeCuts"],
         laser_off: !parameters["laserActive"],
-        cut_speed: parameters["speed"],
+        cut_speed: parameters["cut_speed"],
         svg: svgContent,
+        scaling: parameters["svg_scaling"]
       }));
   }
 
