@@ -87,6 +87,60 @@ export const ControlPanel = ({
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="svg_offset">Model Offset (mm)</Label>
+          <div className="flex w-full gap-2" id="svg_offset">
+            <div>
+              <Label htmlFor="x_offset">x offset</Label>
+              <Input
+                id="x_offset"
+                type="number"
+                min="0"
+                step="1"
+                value={parameters.x_offset || 0}
+                autoComplete="off"
+                onKeyDown={(e) => {
+                  if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-' || e.key === '.') {
+                    e.preventDefault();
+                  }
+                }}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value.replace(',', '.'));
+                  onParametersChange({
+                    ...parameters,
+                    x_offset: isNaN(value) ? 0 : value,
+                  });
+                }}
+                disabled={disabled}
+              />
+            </div>
+            <div>
+              <Label htmlFor="y_offset" className="text-center w-full">y offset</Label>
+              <Input
+                id="y_offset"
+                type="number"
+                min="0"
+                step="1"
+                value={parameters.y_offset || 0}
+                autoComplete="off"
+                onKeyDown={(e) => {
+                  if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-' || e.key === '.') {
+                    e.preventDefault();
+                  }
+                }}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value.replace(',', '.'));
+                  onParametersChange({
+                    ...parameters,
+                    y_offset: isNaN(value) ? 0 : value,
+                  });
+                }}
+                disabled={disabled}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="thickness">Thickness (mm)</Label>
           <Input
             id="thickness"
