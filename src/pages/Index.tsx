@@ -18,6 +18,8 @@ const Index = () => {
     laserActive: true,
     optimizeCuts: true,
     svg_scaling: "mm",
+x_offset: 0,
+    y_offset: 0
   });
   const [progressValue, setProgressValue] = useState<number>(0);
   const [showProgress, setShowProgress] = useState<boolean>(false);
