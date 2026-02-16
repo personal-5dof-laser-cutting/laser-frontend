@@ -24,4 +24,6 @@ export interface CuttingParameters {
   laserActive: boolean;
   optimizeCuts: boolean;
   svg_scaling: string;
+x_offset: number;
+  y_offset: number;
 }
