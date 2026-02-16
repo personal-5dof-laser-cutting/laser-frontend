@@ -99,7 +99,7 @@ export const ControlPanel = ({
                 value={parameters.x_offset || 0}
                 autoComplete="off"
                 onKeyDown={(e) => {
-                  if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-' || e.key === '.') {
+                  if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-' || e.key === ',') {
                     e.preventDefault();
                   }
                 }}
@@ -123,7 +123,7 @@ export const ControlPanel = ({
                 value={parameters.y_offset || 0}
                 autoComplete="off"
                 onKeyDown={(e) => {
-                  if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-' || e.key === '.') {
+                  if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-' || e.key === ',') {
                     e.preventDefault();
                   }
                 }}
@@ -150,7 +150,7 @@ export const ControlPanel = ({
             value={parameters.material_thickness || ""}
             autoComplete="off"
             onKeyDown={(e) => {
-              if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-' || e.key === '.') {
+              if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-' || e.key === ',') {
                 e.preventDefault();
               }
             }}
@@ -175,12 +175,12 @@ export const ControlPanel = ({
             step="1"
             value={parameters.cut_speed || ""}
             onKeyDown={(e) => {
-              if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') {
+              if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-' || e.key === ',') {
                 e.preventDefault();
               }
             }}
             onChange={(e) => {
-              const value = parseFloat(e.target.value);
+              const value = parseFloat(e.target.value.replace(',', '.'));
               const clampedValue = isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100);
               onParametersChange({
                 ...parameters,
