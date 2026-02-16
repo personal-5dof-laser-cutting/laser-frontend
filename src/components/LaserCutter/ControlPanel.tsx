@@ -67,9 +67,9 @@ export const ControlPanel = ({
         <div className="space-y-2">
           <Label htmlFor="scaling">SVG Scaling</Label>
           <Select
-            value={parameters.svg_scaling}
+            value={parameters.scaling}
             onValueChange={(value) =>
-              onParametersChange({ ...parameters, svg_scaling: value })
+              onParametersChange({ ...parameters, scaling: value })
             }
             disabled={disabled}
           >
@@ -199,7 +199,7 @@ export const ControlPanel = ({
             onCheckedChange={(e) => {
               onParametersChange({
                 ...parameters,
-                laserActive: e
+                laser_off: !e
               });
             }}
             disabled={disabled}
@@ -214,7 +214,7 @@ export const ControlPanel = ({
             onCheckedChange={(e) => {
               onParametersChange({
                 ...parameters,
-                optimizeCuts: e
+                optimize: e
               });
             }}
             disabled={disabled}

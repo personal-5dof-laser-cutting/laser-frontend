@@ -9,16 +9,16 @@ import { toast } from "sonner";
 import { WSMessage, wsService } from "@/services/websocket";
 
 const Index = () => {
-  const [svgContent, setSvgContent] = useState<string | null>(null);
   const [parsedPaths, setParsedPaths] = useState<SVGPathData[]>([]);
   const [parameters, setParameters] = useState<CuttingParameters>({
     material: "wood",
     material_thickness: 3,
     cut_speed: 5,
-    laserActive: true,
-    optimizeCuts: true,
-    svg_scaling: "mm",
-x_offset: 0,
+    laser_off: false,
+    optimize: true,
+    svg: null,
+    scaling: "mm",
+    x_offset: 0,
     y_offset: 0
   });
   const [progressValue, setProgressValue] = useState<number>(0);
@@ -42,7 +42,7 @@ x_offset: 0,
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
-      setSvgContent(content);
+      setParameters({...parameters, svg: content});
       toast.success("SVG loaded successfully");
     };
     reader.onerror = () => {
@@ -105,7 +105,7 @@ x_offset: 0,
   }
 
   const handleTraceOutline = () => {
-    if (!svgContent) {
+    if (!parameters["svg"]) {
       toast.error("Please load an SVG file first");
       return;
     }
@@ -115,7 +115,7 @@ x_offset: 0,
   };
 
   const handleStartCutting = async () => {
-    if (!svgContent) {
+    if (!parameters["svg"]) {
       toast.error("Please load an SVG file first");
       return;
     }
@@ -127,15 +127,7 @@ x_offset: 0,
     setProgressValue(0);
     setProgressText("Initializing cut...");
 
-    wsService.send(JSON.stringify({
-      material: parameters["material"],
-        material_thickness: parameters["material_thickness"],
-        optimize: parameters["optimizeCuts"],
-        laser_off: !parameters["laserActive"],
-        cut_speed: parameters["cut_speed"],
-        svg: svgContent,
-        scaling: parameters["svg_scaling"]
-      }));
+    wsService.send(JSON.stringify(parameters));
   }
 
   const abortCut = async () => {
@@ -151,7 +143,7 @@ x_offset: 0,
   }
 
   const handleGenerateGCode = async () => {
-    if (!svgContent) {
+    if (!parameters["svg"]) {
       toast.error("Please load an SVG file first");
       return;
     }
@@ -163,13 +155,7 @@ x_offset: 0,
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        material_thickness: parameters["thickness"],
-        optimize: parameters["optimizeCuts"],
-        laser_off: !parameters["laserActive"],
-        cut_speed: parameters["speed"],
-        svg: svgContent,
-      })
+      body: JSON.stringify(parameters)
     });
     if (response.ok) {
       const blob = await response.blob();
@@ -185,7 +171,7 @@ x_offset: 0,
   };
 
   const handleRemoveFile = () => {
-    setSvgContent(null);
+    parameters["svg"] = null;
     setParsedPaths([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -208,7 +194,7 @@ x_offset: 0,
                 <Upload className="mr-2 h-4 w-4" />
                 Upload SVG
               </Button>
-              {svgContent && (
+              {parameters["svg"] && (
                 <Button
                   onClick={handleRemoveFile}
                   variant="destructive"
@@ -235,7 +221,7 @@ x_offset: 0,
           {/* Editor Area */}
           <div className="w-full h-full">
             <SVGEditor 
-              svgContent={svgContent} 
+              svgContent={parameters["svg"]} 
               onSVGParsed={handleSVGParsed}
               onUploadClick={() => fileInputRef.current?.click()}
             />
@@ -248,7 +234,7 @@ x_offset: 0,
               onParametersChange={setParameters}
               onTraceOutline={handleTraceOutline}
               onStartCutting={handleStartCutting}
-              disabled={!svgContent}
+              disabled={!parameters["svg"]}
             />
           </div>
         </div>
