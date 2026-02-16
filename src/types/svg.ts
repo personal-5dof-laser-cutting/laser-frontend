@@ -21,9 +21,10 @@ export interface CuttingParameters {
   material: string;
   material_thickness: number;
   cut_speed: number;
-  laserActive: boolean;
-  optimizeCuts: boolean;
-  svg_scaling: string;
-x_offset: number;
+  laser_off: boolean;
+  optimize: boolean;
+  svg: string | null;
+  scaling: string;
+  x_offset: number;
   y_offset: number;
 }
