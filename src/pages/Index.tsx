@@ -233,6 +233,7 @@ const Index = () => {
               parameters={parameters}
               onParametersChange={setParameters}
               onTraceOutline={handleTraceOutline}
+              onGenerateGCode={handleGenerateGCode}
               onStartCutting={handleStartCutting}
               disabled={!parameters["svg"]}
             />
