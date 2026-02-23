@@ -17,6 +17,7 @@ interface ControlPanelProps {
   parameters: CuttingParameters;
   onParametersChange: (params: CuttingParameters) => void;
   onTraceOutline: () => void;
+  onGenerateGCode: () => void;
   onStartCutting: () => void;
   disabled?: boolean;
 }
@@ -33,6 +34,7 @@ export const ControlPanel = ({
   parameters,
   onParametersChange,
   onTraceOutline,
+  onGenerateGCode,
   onStartCutting,
   disabled = false,
 }: ControlPanelProps) => {
@@ -222,6 +224,15 @@ export const ControlPanel = ({
         </div>
 
         <div className="pt-4 space-y-3">
+          <Button
+            onClick={onGenerateGCode}
+            disabled={disabled}
+            className="w-full"
+            variant="outline"
+          >
+            Generate G-Code
+          </Button>
+
           <Button
             onClick={onTraceOutline}
             disabled={disabled}
