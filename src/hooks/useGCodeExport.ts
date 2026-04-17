@@ -15,9 +15,9 @@ export function useGCodeExport() {
                 body: JSON.stringify(parameters)
             });
             if (!response.ok) {
-                const errorBody = await response.json().catch(() => ({ detail: "Unknown error" }));
+                const errorBody = await response.json();
                 console.error("G-Code generation failed:", errorBody);
-                toast.error(`Failed: ${errorBody.detail ?? response.statusText}`)
+                toast.error(`Failed: ${response.statusText}`)
                 return;
             }
             const blob = await response.blob();
