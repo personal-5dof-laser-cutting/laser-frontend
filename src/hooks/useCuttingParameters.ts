@@ -8,7 +8,7 @@ const DEFAULT_PARAMETERS: CuttingParameters = {
     laser_off: false,
     optimize: false,
     svg: null,
-    scaling: "mm",
+    dpi: 72,
     x_offset: 0,
     y_offset: 0,
 };

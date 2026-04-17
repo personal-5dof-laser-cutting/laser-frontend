@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { CuttingParameters, MaterialOption, ScalingOption } from "@/types/svg";
+import { CuttingParameters, MaterialOption } from "@/types/svg";
 import { Play, Scan, Square } from "lucide-react";
 
 interface ControlPanelProps {
@@ -20,10 +20,6 @@ interface ControlPanelProps {
 }
 
 const materials: MaterialOption[] = [{ id: "wood", name: "Wood" }];
-const scalings: ScalingOption[] = [
-  { id: "mm", name: "Millimeter" },
-  { id: "illustrator", name: "Adobe Illustrator" },
-];
 
 const numberInputProps = {
   onKeyDown: (e: React.KeyboardEvent) => {
@@ -69,20 +65,19 @@ export const ControlPanel = ({
 
         <div className="space-y-2">
           <Label htmlFor="scaling">SVG Scaling</Label>
-          <Select
-            value={parameters.scaling}
-            onValueChange={(value) => update({ scaling: value })}
+          <Input
+            id="dpi"
+            type="number"
+            min="0"
+            value={parameters.dpi}
+            autoComplete="off"
+            {...numberInputProps}
+            onChange={(e) => {
+              const v = parseFloat(e.target.value.replace(",", "."));
+              update({ dpi: isNaN(v) ? 0 : v});
+            }}
             disabled={disabled}
-          >
-            <SelectTrigger id="scaling">
-              <SelectValue placeholder="Select scaling" />
-            </SelectTrigger>
-            <SelectContent>
-              {scalings.map((s) => (
-                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            />
         </div>
 
         <div className="space-y-2">

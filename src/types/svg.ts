@@ -12,11 +12,6 @@ export interface MaterialOption {
   name: string;
 }
 
-export interface ScalingOption {
-  id: string;
-  name: string;
-}
-
 export interface CuttingParameters {
   material: string;
   material_thickness: number;
@@ -24,7 +19,7 @@ export interface CuttingParameters {
   laser_off: boolean;
   optimize: boolean;
   svg: string | null;
-  scaling: string;
+  dpi: number;
   x_offset: number;
   y_offset: number;
 }
