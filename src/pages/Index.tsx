@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { SVGEditor } from "@/components/LaserCutter/SVGEditor";
 import { ControlPanel } from "@/components/LaserCutter/ControlPanel";
 import { CuttingParameters, SVGPathData } from "@/types/svg";
-import { Upload, X } from "lucide-react";
+import { X } from "lucide-react";
 import { toast } from "sonner";
 import { WSMessage, wsService } from "@/services/websocket";
 
@@ -12,8 +12,9 @@ const Index = () => {
   const [parsedPaths, setParsedPaths] = useState<SVGPathData[]>([]);
   const [parameters, setParameters] = useState<CuttingParameters>({
     material: "wood",
-    material_thickness: 3,
+    material_thickness: 5,
     cut_speed: 5,
+    cut_power: 70,
     laser_off: false,
     optimize: true,
     svg: null,
@@ -24,16 +25,29 @@ const Index = () => {
   const [progressValue, setProgressValue] = useState<number>(0);
   const [showProgress, setShowProgress] = useState<boolean>(false);
   const [progressText, setProgressText] = useState<string>("");
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     wsService.connectWebsocket(handleMessage);;
   }, []);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't toggle when typing in input fields
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT") {
+        return;
+      }
+      if (e.key === "h" || e.key === "H") {
+        setShowAdvanced((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
+  const loadSVGFile = (file: File) => {
     if (!file.name.endsWith(".svg")) {
       toast.error("Please upload an SVG file");
       return;
@@ -49,6 +63,16 @@ const Index = () => {
       toast.error("Failed to load SVG file");
     };
     reader.readAsText(file);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    loadSVGFile(file);
+  };
+
+  const handleFileDrop = (file: File) => {
+    loadSVGFile(file);
   };
 
   const handleSVGParsed = useCallback((paths: SVGPathData[]) => {
@@ -119,13 +143,13 @@ const Index = () => {
       toast.error("Please load an SVG file first");
       return;
     }
-    toast.success("Starting cutting operation...");
+    toast.success("Cutting...");
     console.log("Start cutting with parameters:", parameters);
     console.log("Parsed paths:", parsedPaths);
     // show progress on bar pop up
-    setShowProgress(true);
-    setProgressValue(0);
-    setProgressText("Initializing cut...");
+    // setShowProgress(true);
+    // setProgressValue(0);
+    // setProgressText("Initializing cut...");
 
     wsService.send(JSON.stringify(parameters));
   }
@@ -181,49 +205,24 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-end">
-            <div className="flex gap-2">
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                variant="default"
-                className="bg-gray-500 text-white hover:bg-gray-400"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Upload SVG
-              </Button>
-              {parameters["svg"] && (
-                <Button
-                  onClick={handleRemoveFile}
-                  variant="destructive"
-                >
-                  <X className="mr-2 h-4 w-4" />
-                  Remove File
-                </Button>
-              )}
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".svg"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-          </div>
-        </div>
-      </header>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".svg"
+        onChange={handleFileUpload}
+        className="hidden"
+      />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6 h-[calc(100vh-140px)]">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-6 h-[calc(100vh-48px)]">
           {/* Editor Area */}
           <div className="w-full h-full">
             <SVGEditor 
               svgContent={parameters["svg"]} 
               onSVGParsed={handleSVGParsed}
               onUploadClick={() => fileInputRef.current?.click()}
+              onFileDrop={handleFileDrop}
             />
           </div>
 
@@ -236,6 +235,7 @@ const Index = () => {
               onGenerateGCode={handleGenerateGCode}
               onStartCutting={handleStartCutting}
               disabled={!parameters["svg"]}
+              showAdvanced={showAdvanced}
             />
           </div>
         </div>

@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { SVGPathData } from "@/types/svg";
-import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 
 interface SVGEditorProps {
   svgContent: string | null;
   onSVGParsed?: (paths: SVGPathData[]) => void;
   onUploadClick?: () => void;
+  onFileDrop?: (file: File) => void;
 }
 
-export const SVGEditor = ({ svgContent, onSVGParsed, onUploadClick }: SVGEditorProps) => {
+export const SVGEditor = ({ svgContent, onSVGParsed, onUploadClick, onFileDrop }: SVGEditorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [parsedPaths, setParsedPaths] = useState<SVGPathData[]>([]);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   useEffect(() => {
     if (!svgContent || !containerRef.current) return;
@@ -48,25 +49,47 @@ export const SVGEditor = ({ svgContent, onSVGParsed, onUploadClick }: SVGEditorP
     svgElement.style.maxHeight = "100%";
   }, [svgContent, onSVGParsed]);
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      onFileDrop?.(file);
+    }
+  };
+
   return (
-    <div className="w-full h-full flex items-center justify-center bg-muted/30 border-2 border-dashed border-border rounded-lg overflow-hidden">
+    <div
+      className={`w-full h-full flex items-center justify-center bg-muted/30 border-2 border-dashed rounded-lg overflow-hidden transition-colors ${
+        isDragOver ? "border-primary bg-primary/10" : "border-border"
+      }`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      onClick={!svgContent ? onUploadClick : undefined}
+    >
       {svgContent ? (
         <div
           ref={containerRef}
           className="w-full h-full flex items-center justify-center p-4"
         />
       ) : (
-        <div className="text-center text-muted-foreground">
-          <p className="text-lg font-medium mb-4">No SVG loaded</p>
-          <Button
-            onClick={onUploadClick}
-            variant="outline"
-            size="lg"
-            className="bg-gray-500 text-white hover:bg-gray-400"
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            Upload SVG File
-          </Button>
+        <div className="text-center text-muted-foreground cursor-pointer">
+          <Upload className="mx-auto h-10 w-10 mb-4" />
+          <p className="text-lg font-medium">Upload SVG5DOF</p>
         </div>
       )}
     </div>

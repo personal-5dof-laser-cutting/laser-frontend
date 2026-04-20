@@ -21,6 +21,7 @@ export interface CuttingParameters {
   material: string;
   material_thickness: number;
   cut_speed: number;
+  cut_power: number;
   laser_off: boolean;
   optimize: boolean;
   svg: string | null;
