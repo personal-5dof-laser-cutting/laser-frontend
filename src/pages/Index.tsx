@@ -17,9 +17,10 @@ const Index = () => {
   const { parameters, setParameters, setSvg } = useCuttingParameters();
   const { progress, update: updateProgress, reset: resetProgress } = useProgress();
   const { generateGCode } = useGCodeExport();
-
   const handleMessage = useCallback((msg: WSMessage) => {
     switch (msg.type) {
+      case "info":
+        console.log("Got info:", msg.content)
       case "update":
         updateProgress(msg.content);
         break;
@@ -62,18 +63,40 @@ const Index = () => {
     toast.success("File removed");
   };
 
-  const handleStartCutting = () => {
+  const handleStartCutting = async () => {
     if (!parameters.svg) {
       toast.error("Please load an SVG file first");
       return;
     }
-    toast.success("Starting cutting operation...");
-    updateProgress("Initializing cut...");
-    send(JSON.stringify(parameters));
+    try{
+      updateProgress("Starting job...")
+
+      const response = await fetch("http://127.0.0.1:8000/cut_svg", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parameters)
+      });
+
+      if (!response.ok) {
+          const errorBody = await response.json();
+          console.error("Failed to start cutting:", errorBody);
+          toast.error(`Failed: ${response.statusText}`)
+          return;
+      }
+      const { job_id } = await response.json()
+      toast.success("Starting cutting operation...");
+      
+      send({type: "job_id", content: job_id})
+
+    } catch (err) {
+        toast.error("Failed to start cutting");
+        console.error(err)
+        resetProgress();
+    }
   };
 
   const handleAbortCut = () => {
-    send(JSON.stringify({ type: "abort" }));
+    send({ type: "abort", content: "" });
     resetProgress();
     toast.info("Cut operation aborted");
   };
