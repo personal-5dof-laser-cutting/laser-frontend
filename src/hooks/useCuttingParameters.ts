@@ -11,6 +11,7 @@ const DEFAULT_PARAMETERS: CuttingParameters = {
     dpi: 72,
     x_offset: 0,
     y_offset: 0,
+    model_scale: 1,
 };
 
 export function useCuttingParameters() {

@@ -11,7 +11,7 @@ interface CutbedSize {
 interface SVGEditorProps {
   svgContent: string | null;
   cutbedSize: CutbedSize;
-  scaling: string;
+  dpi: number;
   laserPosition: LaserPosition;
   laserActive: boolean;
   showLaser: boolean;
@@ -57,7 +57,7 @@ interface ContentPlacement {
 export const SVGEditor = ({
   svgContent,
   cutbedSize: defaultCutbedSize,
-  scaling,
+  dpi,
   laserPosition,
   laserActive,
   showLaser,
@@ -209,7 +209,7 @@ export const SVGEditor = ({
     if (!svgElement) return;
     onModelLayoutChange?.(null);
 
-    const selectedUnitsPerMillimeter = scaling === "illustrator" ? ILLUSTRATOR_UNITS_PER_MM : 1;
+    const selectedUnitsPerMillimeter = dpi/ 25.4;
 
     setPreviewAspectRatio(cutbedSize.width / cutbedSize.height);
     svgElement.setAttribute(
@@ -326,7 +326,7 @@ export const SVGEditor = ({
     svgElement.setAttribute("preserveAspectRatio", "xMidYMid meet");
     svgElement.style.maxWidth = "100%";
     svgElement.style.maxHeight = "100%";
-  }, [svgContent, defaultCutbedSize.height, defaultCutbedSize.width, onModelLayoutChange, onSVGParsed, scaling]);
+  }, [svgContent, defaultCutbedSize.height, defaultCutbedSize.width, onModelLayoutChange, onSVGParsed, dpi]);
 
   useEffect(() => {
     const placement = contentPlacementRef.current;

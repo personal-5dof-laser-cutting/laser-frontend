@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { SVGEditor } from "@/components/LaserCutter/SVGEditor";
 import { ControlPanel } from "@/components/LaserCutter/ControlPanel";
 import { ProgressBar } from "@/components/LaserCutter/ProgressBar";
@@ -32,18 +32,7 @@ const Index = () => {
     y: 0,
     angle: 0,
   });
-  const [parameters, setParameters] = useState<CuttingParameters>({
-    material: "wood",
-    material_thickness: 3,
-    cut_speed: 5,
-    laser_off: false,
-    optimize: true,
-    svg: null,
-    scaling: "mm",
-    x_offset: 0,
-    y_offset: 0,
-    model_scale: 1
-  });
+
   const [progressValue, setProgressValue] = useState<number>(0);
   const [showProgress, setShowProgress] = useState<boolean>(false);
   const [progressText, setProgressText] = useState<string>("");
@@ -55,6 +44,7 @@ const Index = () => {
     switch (msg.type) {
       case "info":
         console.log("Got info:", msg.content)
+        break;
       case "update":
         updateProgress(msg.content);
         break;
@@ -137,11 +127,11 @@ const Index = () => {
     if (paths.length > 0) toast.info(`Parsed ${paths.length} elements`);
   }, []);
 
-  const handleRemoveFile = () => {
-    setSvg(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    toast.success("File removed");
-  };
+  // const handleRemoveFile = () => {
+  //   setSvg(null);
+  //   if (fileInputRef.current) fileInputRef.current.value = "";
+  //   toast.success("File removed");
+  // };
 
   const handleStartCutting = async () => {
     if (!parameters.svg) {
@@ -180,33 +170,12 @@ const Index = () => {
     resetProgress();
     toast.info("Cut operation aborted");
   };
-
   const handleTraceOutline = () => {
     if (!parameters.svg) {
       toast.error("Please load an SVG file first");
       return;
     }
-    toast.success("Starting generating gcode...");
-    console.log("Start generating with parameters:", parameters);
-    console.log("Parsed paths:", parsedPaths);
-    const response = await fetch("http://127.0.0.1:8000/generate_gcode", {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(parameters)
-    });
-    if (response.ok) {
-      const blob = await response.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl
-      link.download = "model.gcode";
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      window.URL.revokeObjectURL(downloadUrl)
-    }
+    toast.info("Tracing outline...");
   };
 
   const handleRemoveFile = () => {
@@ -266,7 +235,7 @@ const Index = () => {
             <SVGEditor
               svgContent={parameters.svg}
               cutbedSize={CUTBED_SIZE_MM}
-              scaling={parameters.scaling}
+              dpi={parameters.dpi}
               laserPosition={laserPosition}
               laserActive={!parameters.laser_off}
               showLaser={showLaser}
