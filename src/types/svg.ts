@@ -12,6 +12,19 @@ export interface MaterialOption {
   name: string;
 }
 
+export interface LaserPosition {
+  x: number;
+  y: number;
+  angle: number;
+}
+
+export interface ModelLayout {
+  baseWidth: number;
+  baseHeight: number;
+  cutbedWidth: number;
+  cutbedHeight: number;
+}
+
 export interface CuttingParameters {
   material: string;
   material_thickness: number;
@@ -22,4 +35,5 @@ export interface CuttingParameters {
   dpi: number;
   x_offset: number;
   y_offset: number;
+  model_scale: number;
 }

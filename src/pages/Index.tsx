@@ -1,26 +1,41 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { SVGEditor } from "@/components/LaserCutter/SVGEditor";
 import { ControlPanel } from "@/components/LaserCutter/ControlPanel";
 import { ProgressBar } from "@/components/LaserCutter/ProgressBar";
 import { Button } from "@/components/ui/button";
 import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
-import { SVGPathData } from "@/types/svg";
+
+import { SVGPathData, ModelLayout } from "@/types/svg";
 import { WSMessage } from "@/services/websocket";
 import { useCuttingParameters } from "@/hooks/useCuttingParameters";
 import { useProgress } from "@/hooks/useProgress";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useGCodeExport } from "@/hooks/useGCodeExport";
+import { useLaserPosition } from "@/hooks/useLaserPosition";
+import { useTraceOutline } from "@/hooks/useTraceOutline";
+
+
+
+const CUTBED_SIZE_MM = {
+  width: 400,
+  height: 389,
+};
 
 const Index = () => {
+  const [modelLayout, setModelLayout] = useState<ModelLayout | null>(null);
+  const [showLaser, setShowLaser] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { parameters, setParameters, setSvg } = useCuttingParameters();
+  const { parameters, setParameters, setSvg, setModelOffset, setModelScale, resetForNewFile } = useCuttingParameters();
   const { progress, update: updateProgress, reset: resetProgress } = useProgress();
+  const { laserPosition, updateFromWebSocket, updateFromEditor, resetLaserPosition } = useLaserPosition();
   const { generateGCode } = useGCodeExport();
+  const { traceOutline } = useTraceOutline();
   const handleMessage = useCallback((msg: WSMessage) => {
     switch (msg.type) {
       case "info":
         console.log("Got info:", msg.content)
+        break;
       case "update":
         updateProgress(msg.content);
         break;
@@ -30,10 +45,15 @@ const Index = () => {
       case "error":
         console.error("WS error:", msg.content);
         break;
+      case "laser_position":
+        updateFromWebSocket(msg.content);
+        break;
+  
       default:
         console.warn("Unhandled WS message type:", msg.type);
     }
-  }, [updateProgress]);
+  }, [updateProgress, updateFromWebSocket]);
+  
 
   const { send } = useWebSocket(handleMessage);
 
@@ -46,7 +66,9 @@ const Index = () => {
     }
     const reader = new FileReader();
     reader.onload = (e) => {
+      resetForNewFile()
       setSvg(e.target?.result as string);
+
       toast.success("SVG loaded successfully");
     };
     reader.onerror = () => toast.error("Failed to load SVG file");
@@ -56,12 +78,6 @@ const Index = () => {
   const handleSVGParsed = useCallback((paths: SVGPathData[]) => {
     if (paths.length > 0) toast.info(`Parsed ${paths.length} elements`);
   }, []);
-
-  const handleRemoveFile = () => {
-    setSvg(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-    toast.success("File removed");
-  };
 
   const handleStartCutting = async () => {
     if (!parameters.svg) {
@@ -101,12 +117,14 @@ const Index = () => {
     toast.info("Cut operation aborted");
   };
 
-  const handleTraceOutline = () => {
-    if (!parameters.svg) {
-      toast.error("Please load an SVG file first");
-      return;
+  const handleRemoveFile = () => {
+    resetForNewFile()
+    resetLaserPosition()
+    setModelLayout(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
-    toast.info("Tracing outline...");
+    toast.success("File removed");
   };
 
   return (
@@ -144,15 +162,38 @@ const Index = () => {
           <div className="w-full h-full">
             <SVGEditor
               svgContent={parameters.svg}
+              cutbedSize={CUTBED_SIZE_MM}
+              dpi={parameters.dpi}
+              laserPosition={laserPosition}
+              laserActive={!parameters.laser_off}
+              showLaser={showLaser}
+              modelOffset={{
+                x: parameters.x_offset,
+                y: parameters.y_offset,
+              }}
+              modelScale={parameters.model_scale}
               onSVGParsed={handleSVGParsed}
               onUploadClick={() => fileInputRef.current?.click()}
+              onLaserPositionChange={updateFromEditor}
+              onModelOffsetChange={setModelOffset}
+              onModelScaleChange={setModelScale}
+              onModelLayoutChange={setModelLayout}
             />
           </div>
           <div className="h-full">
             <ControlPanel
               parameters={parameters}
+              laserPosition={{
+                x: parameters["svg"] ? laserPosition.x : 0,
+                y: parameters["svg"] ? CUTBED_SIZE_MM.height - laserPosition.y : 0,
+                angle: 0,
+              }}
+              showLaser={showLaser}
+              modelLayout={modelLayout}
               onParametersChange={setParameters}
-              onTraceOutline={handleTraceOutline}
+              onLaserPositionChange={updateFromEditor}
+              onShowLaserChange={setShowLaser}
+              onTraceOutline={() => traceOutline(parameters)}
               onGenerateGCode={() => generateGCode(parameters)}
               onStartCutting={handleStartCutting}
               onAbortCut={handleAbortCut}
