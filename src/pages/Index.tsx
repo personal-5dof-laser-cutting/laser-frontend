@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
-import { SVGPathData, CuttingParameters, LaserPosition, ModelLayout } from "@/types/svg";
+import { SVGPathData, ModelLayout } from "@/types/svg";
 import { WSMessage } from "@/services/websocket";
 import { useCuttingParameters } from "@/hooks/useCuttingParameters";
 import { useProgress } from "@/hooks/useProgress";
 import { useWebSocket } from "@/hooks/useWebSocket";
 import { useGCodeExport } from "@/hooks/useGCodeExport";
+import { useLaserPosition } from "@/hooks/useLaserPosition";
+import { useTraceOutline } from "@/hooks/useTraceOutline";
 
 
 
@@ -20,26 +22,15 @@ const CUTBED_SIZE_MM = {
   height: 389,
 };
 
-const getInitialSVGScaling = (svgContent: string) =>
-  svgContent.includes("Adobe Illustrator") ? "illustrator" : "mm";
-
 const Index = () => {
-  const [parsedPaths, setParsedPaths] = useState<SVGPathData[]>([]);
   const [modelLayout, setModelLayout] = useState<ModelLayout | null>(null);
   const [showLaser, setShowLaser] = useState(true);
-  const [laserPosition, setLaserPosition] = useState<LaserPosition>({
-    x: 0,
-    y: 0,
-    angle: 0,
-  });
-
-  const [progressValue, setProgressValue] = useState<number>(0);
-  const [showProgress, setShowProgress] = useState<boolean>(false);
-  const [progressText, setProgressText] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { parameters, setParameters, setSvg } = useCuttingParameters();
+  const { parameters, setParameters, setSvg, setModelOffset, setModelScale, resetForNewFile } = useCuttingParameters();
   const { progress, update: updateProgress, reset: resetProgress } = useProgress();
+  const { laserPosition, updateFromWebSocket, updateFromEditor, resetLaserPosition } = useLaserPosition();
   const { generateGCode } = useGCodeExport();
+  const { traceOutline } = useTraceOutline();
   const handleMessage = useCallback((msg: WSMessage) => {
     switch (msg.type) {
       case "info":
@@ -55,45 +46,13 @@ const Index = () => {
         console.error("WS error:", msg.content);
         break;
       case "laser_position":
-        updateLaserPosition(msg.content);
+        updateFromWebSocket(msg.content);
         break;
   
       default:
         console.warn("Unhandled WS message type:", msg.type);
     }
-  }, [updateProgress]);
-
-  function updateLaserPosition(content: string) {
-    try {
-      const nextPosition = JSON.parse(content) as Partial<LaserPosition>;
-      setLaserPosition((currentPosition) => ({
-        x: typeof nextPosition.x === "number" ? nextPosition.x : currentPosition.x,
-        y: typeof nextPosition.y === "number" ? nextPosition.y : currentPosition.y,
-        angle: 0,
-      }));
-    } catch (err) {
-      console.error("Failed to parse laser position:\n", err);
-    }
-  }
-
-  function handleLaserPositionChange(position: LaserPosition) {
-    setLaserPosition({ ...position, angle: 0 });
-  }
-
-  function handleModelOffsetChange(offset: { x: number; y: number }) {
-    setParameters((currentParameters) => ({
-      ...currentParameters,
-      x_offset: offset.x,
-      y_offset: offset.y,
-    }));
-  }
-
-  function handleModelScaleChange(scale: number) {
-    setParameters((currentParameters) => ({
-      ...currentParameters,
-      model_scale: scale,
-    }));
-  }
+  }, [updateProgress, updateFromWebSocket]);
   
 
   const { send } = useWebSocket(handleMessage);
@@ -107,16 +66,9 @@ const Index = () => {
     }
     const reader = new FileReader();
     reader.onload = (e) => {
+      resetForNewFile()
       setSvg(e.target?.result as string);
-      // setParameters((currentParameters) => ({
-      //   ...currentParameters,
-      //   svg: content,
-      //   scaling: getInitialSVGScaling(content),
-      //   x_offset: 0,
-      //   y_offset: 0,
-      //   model_scale: 1,
-      // }));
-      // setModelLayout(null);
+
       toast.success("SVG loaded successfully");
     };
     reader.onerror = () => toast.error("Failed to load SVG file");
@@ -126,12 +78,6 @@ const Index = () => {
   const handleSVGParsed = useCallback((paths: SVGPathData[]) => {
     if (paths.length > 0) toast.info(`Parsed ${paths.length} elements`);
   }, []);
-
-  // const handleRemoveFile = () => {
-  //   setSvg(null);
-  //   if (fileInputRef.current) fileInputRef.current.value = "";
-  //   toast.success("File removed");
-  // };
 
   const handleStartCutting = async () => {
     if (!parameters.svg) {
@@ -170,29 +116,11 @@ const Index = () => {
     resetProgress();
     toast.info("Cut operation aborted");
   };
-  const handleTraceOutline = () => {
-    if (!parameters.svg) {
-      toast.error("Please load an SVG file first");
-      return;
-    }
-    toast.info("Tracing outline...");
-  };
 
   const handleRemoveFile = () => {
-    setParameters((currentParameters) => ({
-      ...currentParameters,
-      svg: null,
-      x_offset: 0,
-      y_offset: 0,
-      model_scale: 1,
-    }));
-    setLaserPosition({
-      x: 0,
-      y: 0,
-      angle: 0,
-    });
+    resetForNewFile()
+    resetLaserPosition()
     setModelLayout(null);
-    setParsedPaths([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -246,9 +174,9 @@ const Index = () => {
               modelScale={parameters.model_scale}
               onSVGParsed={handleSVGParsed}
               onUploadClick={() => fileInputRef.current?.click()}
-              onLaserPositionChange={handleLaserPositionChange}
-              onModelOffsetChange={handleModelOffsetChange}
-              onModelScaleChange={handleModelScaleChange}
+              onLaserPositionChange={updateFromEditor}
+              onModelOffsetChange={setModelOffset}
+              onModelScaleChange={setModelScale}
               onModelLayoutChange={setModelLayout}
             />
           </div>
@@ -263,15 +191,9 @@ const Index = () => {
               showLaser={showLaser}
               modelLayout={modelLayout}
               onParametersChange={setParameters}
-              onLaserPositionChange={(position) => {
-                setLaserPosition({
-                  x: position.x,
-                  y: CUTBED_SIZE_MM.height - position.y,
-                  angle: 0,
-                });
-              }}
+              onLaserPositionChange={updateFromEditor}
               onShowLaserChange={setShowLaser}
-              onTraceOutline={handleTraceOutline}
+              onTraceOutline={() => traceOutline(parameters)}
               onGenerateGCode={() => generateGCode(parameters)}
               onStartCutting={handleStartCutting}
               onAbortCut={handleAbortCut}
