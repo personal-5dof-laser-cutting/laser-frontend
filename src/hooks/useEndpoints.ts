@@ -54,6 +54,8 @@ async function extractErrorMessage(response: Response, statusCode: number): Prom
 
 export function useBackendCalling() {
 
+    const { update: updateProgress, reset: resetProgress } = useProgress()
+
     const generateGCode = async (parameters: CuttingParameters) => {
         if (!parameters.svg) {
             toast.error("Please load an SVG file first");
@@ -76,6 +78,25 @@ export function useBackendCalling() {
         link.remove()
         window.URL.revokeObjectURL(url);
     };
+    
+    const cutSVG = async (parameters: CuttingParameters) => {
+        if (!parameters.svg) {
+            toast.error("Please load an SVG file first");
+            return;
+        }
+        updateProgress("Starting job...")
+        const postResponse = await postToEndpoint("http://127.0.0.1:8000/cut_svg", JSON.stringify(parameters))
+        if (postResponse.success === false) {
+            console.error("Failed to start cutting:", postResponse.error);
+            toast.error(`Failed: ${postResponse.error}`)
+            resetProgress();
+            return
+        }
+        const { job_id } = await postResponse.http_response.json()
+        toast.success("Starting cutting operation...");
+        
+        wsService.send({type: "job_id", content: job_id})
+    };
 
-    return { generateGCode }
+    return { generateGCode, cutSVG }
 }

@@ -11,7 +11,7 @@ import { WSMessage, wsService } from "@/services/websocket";
 import { useCuttingParameters } from "@/hooks/useCuttingParameters";
 import { useProgress } from "@/hooks/useProgress";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import { useBackendCalling } from "@/hooks/useGCodeExport";
+import { useBackendCalling } from "@/hooks/useEndpoints";
 import { useLaserPosition } from "@/hooks/useLaserPosition";
 import { useTraceOutline } from "@/hooks/useTraceOutline";
 
@@ -29,7 +29,7 @@ const Index = () => {
   const { parameters, setParameters, setSvg, setModelOffset, setModelScale, resetForNewFile } = useCuttingParameters();
   const { progress, update: updateProgress, reset: resetProgress } = useProgress();
   const { laserPosition, updateFromWebSocket, updateFromEditor, resetLaserPosition } = useLaserPosition();
-  const { generateGCode } = useBackendCalling();
+  const { generateGCode, cutSVG } = useBackendCalling();
   const { traceOutline } = useTraceOutline();
   const handleMessage = useCallback((msg: WSMessage) => {
     switch (msg.type) {
@@ -76,38 +76,6 @@ const Index = () => {
   const handleSVGParsed = useCallback((paths: SVGPathData[]) => {
     if (paths.length > 0) toast.info(`Parsed ${paths.length} elements`);
   }, []);
-
-  const handleStartCutting = async () => {
-    if (!parameters.svg) {
-      toast.error("Please load an SVG file first");
-      return;
-    }
-    try{
-      updateProgress("Starting job...")
-
-      const response = await fetch("http://127.0.0.1:8000/cut_svg", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parameters)
-      });
-
-      if (!response.ok) {
-          const errorBody = await response.json();
-          console.error("Failed to start cutting:", errorBody);
-          toast.error(`Failed: ${response.statusText}`)
-          return;
-      }
-      const { job_id } = await response.json()
-      toast.success("Starting cutting operation...");
-      
-      wsService.send({type: "job_id", content: job_id})
-
-    } catch (err) {
-        toast.error("Failed to start cutting");
-        console.error(err)
-        resetProgress();
-    }
-  };
 
   const handleAbortCut = () => {
     wsService.send({ type: "abort", content: "" });
@@ -193,7 +161,7 @@ const Index = () => {
               onShowLaserChange={setShowLaser}
               onTraceOutline={() => traceOutline(parameters)}
               onGenerateGCode={() => generateGCode(parameters)}
-              onStartCutting={handleStartCutting}
+              onStartCutting={() => cutSVG(parameters)}
               onAbortCut={handleAbortCut}
               disabled={!parameters.svg}
             />
