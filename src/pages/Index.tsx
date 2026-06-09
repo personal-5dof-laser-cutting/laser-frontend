@@ -7,7 +7,7 @@ import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { SVGPathData, ModelLayout } from "@/types/svg";
-import { WSMessage } from "@/services/websocket";
+import { WSMessage, wsService } from "@/services/websocket";
 import { useCuttingParameters } from "@/hooks/useCuttingParameters";
 import { useProgress } from "@/hooks/useProgress";
 import { useWebSocket } from "@/hooks/useWebSocket";
@@ -53,9 +53,7 @@ const Index = () => {
         console.warn("Unhandled WS message type:", msg.type);
     }
   }, [updateProgress, updateFromWebSocket]);
-  
-
-  const { send } = useWebSocket(handleMessage);
+  useWebSocket(handleMessage);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -102,7 +100,7 @@ const Index = () => {
       const { job_id } = await response.json()
       toast.success("Starting cutting operation...");
       
-      send({type: "job_id", content: job_id})
+      wsService.send({type: "job_id", content: job_id})
 
     } catch (err) {
         toast.error("Failed to start cutting");
@@ -112,7 +110,7 @@ const Index = () => {
   };
 
   const handleAbortCut = () => {
-    send({ type: "abort", content: "" });
+    wsService.send({ type: "abort", content: "" });
     resetProgress();
     toast.info("Cut operation aborted");
   };

@@ -9,10 +9,4 @@ export function useWebSocket(onMessage: (msg: WSMessage) => void) {
         wsService.connectWebsocket((msg) => onMessageRef.current(msg));
         return () => wsService.disconnect(1000, "Connection shut down", false)
     }, []);
-
-    const send = useCallback((data: WSMessage) => {
-        wsService.send(data);
-    }, []);
-
-    return { send }
 }
