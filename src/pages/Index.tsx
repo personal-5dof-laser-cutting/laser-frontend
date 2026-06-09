@@ -11,7 +11,7 @@ import { WSMessage } from "@/services/websocket";
 import { useCuttingParameters } from "@/hooks/useCuttingParameters";
 import { useProgress } from "@/hooks/useProgress";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import { useGCodeExport } from "@/hooks/useGCodeExport";
+import { useBackendCalling } from "@/hooks/useGCodeExport";
 import { useLaserPosition } from "@/hooks/useLaserPosition";
 import { useTraceOutline } from "@/hooks/useTraceOutline";
 
@@ -29,7 +29,7 @@ const Index = () => {
   const { parameters, setParameters, setSvg, setModelOffset, setModelScale, resetForNewFile } = useCuttingParameters();
   const { progress, update: updateProgress, reset: resetProgress } = useProgress();
   const { laserPosition, updateFromWebSocket, updateFromEditor, resetLaserPosition } = useLaserPosition();
-  const { generateGCode } = useGCodeExport();
+  const { generateGCode } = useBackendCalling();
   const { traceOutline } = useTraceOutline();
   const handleMessage = useCallback((msg: WSMessage) => {
     switch (msg.type) {

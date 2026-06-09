@@ -1,3 +1,5 @@
+import { z } from "zod"
+
 export interface SVGPathData {
   rotation?: string;
   tilt?: string;
@@ -37,3 +39,11 @@ export interface CuttingParameters {
   y_offset: number;
   model_scale: number;
 }
+
+export const ResponseMessage = z.object({
+  type: z.string(),
+  reason: z.string(),
+  content: z.string(),
+})
+
+export type ResponseMessage = z.infer<typeof ResponseMessage>;
