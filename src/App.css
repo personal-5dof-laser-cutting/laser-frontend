@@ -1,0 +1,35 @@
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1pt black solid;
+}
+
+#sidebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1pt black solid;
+  flex-grow: 1;
+  height: 100%;
+}
+
+#canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1pt black solid;
+  height: 100%;
+
+  flex-grow: 5;
+}
+
+#main-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1pt black solid;
+  gap: 10pt;
+  height: 100%;
+  padding: 10pt;
+}
