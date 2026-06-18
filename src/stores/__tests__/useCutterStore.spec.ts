@@ -1,5 +1,19 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { useCutterStore, INITIAL_STATE } from '@/stores/useCutterStore'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+
+// INFO: vitest runs on node and doesn't have a local storage there
+vi.hoisted(() => {
+  vi.stubGlobal('localStorage', {
+    getItem: vi.fn(() => null),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
+  })
+})
+
+import { useCutterStore } from '@/stores/useCutterStore'
+
+// INFO: vitest happily removes functions if INITIAL_STATE from the store is used
+const INITIAL_STATE = useCutterStore.getState()
 
 describe('useCutterStore', () => {
   beforeEach(() => {
