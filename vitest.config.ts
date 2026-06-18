@@ -5,6 +5,13 @@ import viteConfig from './vite.config'
 export default mergeConfig(
   viteConfig,
   defineConfig({
+    optimizeDeps: {
+      include: [
+        'zustand/vanilla',
+        'zustand/middleware',
+        'zustand/middleware/immer'
+      ],
+    },
     test: {
       environment: 'jsdom',
       exclude: [...configDefaults.exclude, 'e2e/**'],
