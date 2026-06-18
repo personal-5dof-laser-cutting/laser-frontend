@@ -1,11 +1,15 @@
 import { describe, it, expect } from 'vitest'
-
 import { mount } from '@vue/test-utils'
-import HelloWorld from '../HelloWorld.vue'
+import App from '@/App.vue'
 
-describe('HelloWorld', () => {
+describe('App.vue', () => {
   it('renders properly', () => {
-    const wrapper = mount(HelloWorld, { props: { msg: 'Hello Vitest' } })
-    expect(wrapper.text()).toContain('Hello Vitest')
+    const app = mount(App, {
+      global: {
+        stubs: ['router-link', 'router-view'] // INFO: routing breaks this unit test for obvious reasons
+      }
+    })
+
+    expect(app.text()).toContain('Laser Frontend')
   })
 })
