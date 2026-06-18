@@ -6,8 +6,8 @@ describe('App.vue', () => {
   it('renders properly', () => {
     const app = mount(App, {
       global: {
-        stubs: ['router-link', 'router-view'] // INFO: routing breaks this unit test for obvious reasons
-      }
+        stubs: ['router-link', 'router-view'], // INFO: routing breaks this unit test for obvious reasons
+      },
     })
 
     expect(app.text()).toContain('Laser Frontend')
