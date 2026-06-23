@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
-// INFO: vitest runs on node and doesn't have a local storage there
+// INFO: vitest runs on node that doesn't provide local storage
 vi.hoisted(() => {
   vi.stubGlobal('localStorage', {
     getItem: vi.fn(() => null),
@@ -48,7 +48,7 @@ describe('useCutterStore', () => {
 
     store.setAxes({
       y: { current_value: 50 },
-      z: { homed: true, target_value: -10 }
+      z: { homed: true, target_value: -10 },
     })
 
     const state = useCutterStore.getState()
@@ -67,12 +67,12 @@ describe('useCutterStore', () => {
     // INFO: test undefined behaviour
     store.setAxes({
       a: undefined,
-      b: { homed: true }
+      b: { homed: true },
     })
 
     const state = useCutterStore.getState()
     expect(state.axes.a.homed).toBe(false) // INFO: unchanged
-    expect(state.axes.b.homed).toBe(true)  // INFO: updated
+    expect(state.axes.b.homed).toBe(true) // INFO: updated
   })
 
   it('should update a single cutbed dimension via updateCutbed', () => {

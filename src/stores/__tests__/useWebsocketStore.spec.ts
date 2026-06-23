@@ -29,7 +29,6 @@ describe('useWebsocketStore', () => {
         return mockWebSocketInstance
       }),
     )
-
     ;(global.WebSocket as any).CLOSED = 3
     ;(global.WebSocket as any).OPEN = 1
   })
