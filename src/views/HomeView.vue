@@ -1,5 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+ import SVGCanvas from '@/components/SVGCanvas.vue'
+</script>
 
 <template>
-  <main>Hello World!</main>
+  <SVGCanvas/>
 </template>
+
+<style scoped>
+</style>
