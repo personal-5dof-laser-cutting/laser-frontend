@@ -7,10 +7,10 @@ import { useStore } from '@/stores/useStore'
 import uploadIconUrl from '@/assets/icons/upload_file.svg'
 import resetBoxIconUrl from '@/assets/icons/reset_focus.svg'
 
-const store = useStore(useProjectStore)
+const projectStore= useStore(useProjectStore)
 const { uploadSvg, updateSvg, removeSvg, selectSvg, resetProject } = useProjectStore.getState()
-const svgs = computed(() => store.value.svgs)
-const selectedId = computed(() => store.value.selectedId)
+const svgs = computed(() => projectStore.value.svgs)
+const selectedId = computed(() => projectStore.value.selectedId)
 
 const svgRef = ref<SVGSVGElement | null>(null)
 const viewportRef = ref<SVGGElement | null>(null)
