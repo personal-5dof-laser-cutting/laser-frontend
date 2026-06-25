@@ -33,9 +33,12 @@ onMounted(() => {
   nextTick(() => updateBBox())
 })
 
-watch(() => props.item.content, () => {
-  nextTick(() => updateBBox())
-})
+watch(
+  () => props.item.content,
+  () => {
+    nextTick(() => updateBBox())
+  },
+)
 
 const startMove = (evt: MouseEvent) => {
   if (evt.button !== 0) return
@@ -51,7 +54,7 @@ const startMove = (evt: MouseEvent) => {
 
     updateSvg(props.item.id, {
       x: startX + (currentMouse.x - startMouse.x),
-      y: startY + (currentMouse.y - startMouse.y)
+      y: startY + (currentMouse.y - startMouse.y),
     })
   }
 
@@ -70,15 +73,17 @@ const startRotate = (evt: MouseEvent) => {
 
   const startMouse = props.getMousePosition(evt)
 
-  const initialAngle = Math.atan2(startMouse.y - props.item.y, startMouse.x - props.item.x) * (180 / Math.PI)
+  const initialAngle =
+    Math.atan2(startMouse.y - props.item.y, startMouse.x - props.item.x) * (180 / Math.PI)
   const initialRotation = props.item.rotation
 
   const onMouseMove = (moveEvt: MouseEvent) => {
     const currentMouse = props.getMousePosition(moveEvt)
-    const currentAngle = Math.atan2(currentMouse.y - props.item.y, currentMouse.x - props.item.x) * (180 / Math.PI)
+    const currentAngle =
+      Math.atan2(currentMouse.y - props.item.y, currentMouse.x - props.item.x) * (180 / Math.PI)
 
     updateSvg(props.item.id, {
-      rotation: initialRotation + (currentAngle - initialAngle)
+      rotation: initialRotation + (currentAngle - initialAngle),
     })
   }
 
@@ -163,6 +168,5 @@ const startRotate = (evt: MouseEvent) => {
 .rotate-handle:hover {
   fill: #de6207;
   transition: 0.1s ease-out;
-
 }
 </style>

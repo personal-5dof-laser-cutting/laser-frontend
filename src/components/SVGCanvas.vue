@@ -6,8 +6,9 @@ import { useStore } from '@/stores/useStore'
 
 import uploadIconUrl from '@/assets/icons/upload_file.svg'
 import resetBoxIconUrl from '@/assets/icons/reset_focus.svg'
+import deleteIconUrl from '@/assets/icons/delete.svg'
 
-const projectStore= useStore(useProjectStore)
+const projectStore = useStore(useProjectStore)
 const { uploadSvg, updateSvg, removeSvg, selectSvg, resetProject } = useProjectStore.getState()
 const svgs = computed(() => projectStore.value.svgs)
 const selectedId = computed(() => projectStore.value.selectedId)
@@ -20,6 +21,11 @@ const scale = ref(1)
 const isDragging = ref(false)
 const dragStart = ref({ mouseX: 0, mouseY: 0, panX: 0, panY: 0 })
 
+const removeActiveSVG = () => {
+  if (!selectedId.value) return
+
+  removeSvg(selectedId.value)
+}
 
 const getBaseSVGPosition = (evt: MouseEvent) => {
   if (!svgRef.value) return { x: 0, y: 0 }
@@ -31,7 +37,6 @@ const getBaseSVGPosition = (evt: MouseEvent) => {
   pt.y = evt.clientY
   return pt.matrixTransform(CTM.inverse())
 }
-
 
 const getMousePosition = (evt: MouseEvent) => {
   if (!svgRef.value || !viewportRef.value) return { x: 0, y: 0 }
@@ -55,7 +60,7 @@ const startDragging = (evt: MouseEvent) => {
     mouseX: mousePos.x,
     mouseY: mousePos.y,
     panX: pan.value.x,
-    panY: pan.value.y
+    panY: pan.value.y,
   }
 }
 
@@ -68,7 +73,7 @@ const handleDrag = (evt: MouseEvent) => {
 
   pan.value = {
     x: dragStart.value.panX + dx,
-    y: dragStart.value.panY + dy
+    y: dragStart.value.panY + dy,
   }
 }
 
@@ -89,7 +94,7 @@ const handleZoom = (evt: WheelEvent) => {
 
   pan.value = {
     x: mousePos.x - (mousePos.x - pan.value.x) * (scale.value / oldScale),
-    y: mousePos.y - (mousePos.y - pan.value.y) * (scale.value / oldScale)
+    y: mousePos.y - (mousePos.y - pan.value.y) * (scale.value / oldScale),
   }
 }
 </script>
@@ -105,9 +110,14 @@ const handleZoom = (evt: WheelEvent) => {
       <button class="icon-btn" title="Reset Canvas" @click="resetProject">
         <img :src="resetBoxIconUrl" class="btn-icon" alt="Reset Canvas Icon" />
       </button>
+
+      <button class="icon-btn" title="Delete Element" @click="removeActiveSVG"
+        v-if="selectedId">
+        <img :src="deleteIconUrl" class="btn-icon" alt="Delete Element" />
+      </button>
     </div>
 
-   <svg
+    <svg
       viewBox="-50 -50 450 450"
       class="root-svg"
       :class="{ dragging: isDragging }"
@@ -125,7 +135,6 @@ const handleZoom = (evt: WheelEvent) => {
       </defs>
 
       <g :transform="`translate(${pan.x}, ${pan.y}) scale(${scale})`" ref="viewportRef">
-
         <rect
           x="-20000"
           y="-20000"
@@ -164,7 +173,6 @@ const handleZoom = (evt: WheelEvent) => {
   user-select: none;
   cursor: grab;
   vector-effect: non-scaling-stroke;
-
 }
 
 .root-svg.dragging {
@@ -193,7 +201,6 @@ const handleZoom = (evt: WheelEvent) => {
   display: flex;
   justify-content: center;
   align-items: center;
-
 }
 
 .icon-btn:hover {
