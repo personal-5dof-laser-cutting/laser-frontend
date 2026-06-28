@@ -38,9 +38,9 @@ export const INITIAL_STATE: CutterState = {
     b: { homed: false, current_value: null, target_value: null },
   },
   cutbed: {
-    width: 0,
-    depth: 0,
-    height: 0,
+    width: 350,
+    depth: 350,
+    height: 15,
   },
 }
 
