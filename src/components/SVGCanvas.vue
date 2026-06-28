@@ -8,9 +8,11 @@ import { useStore } from '@/stores/useStore'
 import uploadIconUrl from '@/assets/icons/upload_file.svg'
 import resetBoxIconUrl from '@/assets/icons/reset_focus.svg'
 import deleteIconUrl from '@/assets/icons/delete.svg'
+import copyIconUrl from '@/assets/icons/copy.svg'
+import downloadIconUrl from '@/assets/icons/download.svg'
 
 const projectStore = useStore(useProjectStore)
-const { uploadSvg, updateSvg, removeSvg, selectSvg, resetProject } = useProjectStore.getState()
+const { uploadSvg, updateSvg, removeSvg, selectSvg, duplicateSvg, resetProject } = useProjectStore.getState()
 const svgs = computed(() => projectStore.value.svgs)
 const selectedId = computed(() => projectStore.value.selectedId)
 
@@ -25,6 +27,12 @@ const pan = ref({ x: 0, y: 0 })
 const scale = ref(1)
 const isDragging = ref(false)
 const dragStart = ref({ mouseX: 0, mouseY: 0, panX: 0, panY: 0 })
+
+const duplicateActiveSvg = () => {
+  if (!selectedId.value) return
+
+  duplicateSvg(selectedId.value)
+}
 
 const removeActiveSVG = () => {
   if (!selectedId.value) return
@@ -102,6 +110,51 @@ const handleZoom = (evt: WheelEvent) => {
     y: mousePos.y - (mousePos.y - pan.value.y) * (scale.value / oldScale),
   }
 }
+
+// WARN: 100% vibecoded function
+const exportToSvg = () => {
+  const canvasItems = document.querySelectorAll('.canvas-item')
+  let exportedContent = ''
+
+  canvasItems.forEach((node) => {
+    const clone = node.cloneNode(true) as SVGGElement
+
+    const overlay = clone.querySelector('.interface-overlay')
+    if (overlay) {
+      overlay.remove()
+    }
+
+    clone.classList.remove('active')
+
+    exportedContent += clone.outerHTML + '\n'
+  })
+
+  const pxToMm = 25.4 / 96
+  const physicalWidthMm = (cutbedWidth.value * pxToMm).toFixed(3)
+  const physicalHeightMm = (cutbedDepth.value * pxToMm).toFixed(3)
+
+  const finalSvgString = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="${physicalWidthMm}mm"
+  height="${physicalHeightMm}mm"
+  viewBox="0 0 ${cutbedWidth.value} ${cutbedDepth.value}"
+>
+  ${exportedContent}
+</svg>`
+
+  const blob = new Blob([finalSvgString], { type: 'image/svg+xml;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'cutbed-export.svg'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  URL.revokeObjectURL(url)
+}
 </script>
 
 <template>
@@ -118,6 +171,14 @@ const handleZoom = (evt: WheelEvent) => {
 
       <button class="icon-btn" title="Delete Element" @click="removeActiveSVG" v-if="selectedId">
         <img :src="deleteIconUrl" class="btn-icon" alt="Delete Element" />
+      </button>
+
+      <button class="icon-btn" title="Duplicate Element" @click="duplicateActiveSvg" v-if="selectedId">
+        <img :src="copyIconUrl" class="btn-icon" alt="Duplicate Element" />
+      </button>
+
+      <button class="icon-btn" title="Export Project" @click="exportToSvg">
+        <img :src="downloadIconUrl" class="btn-icon" alt="Export Project" />
       </button>
     </div>
 
@@ -228,7 +289,6 @@ const handleZoom = (evt: WheelEvent) => {
 
 .icon-btn:hover {
   border-color: var(--color-border-hover);
-  transition: 0.2s ease-out;
 }
 
 .btn-icon {
