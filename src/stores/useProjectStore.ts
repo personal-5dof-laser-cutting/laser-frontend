@@ -20,6 +20,7 @@ interface ProjectActions {
   updateSvg: (id: string, updates: Partial<SVGData>) => void
   removeSvg: (id: string) => void
   selectSvg: (id: string | null) => void
+  duplicateSvg: (id: string) => void
   resetProject: () => void
 }
 
@@ -28,6 +29,30 @@ type ProjectStore = ProjectState & ProjectActions
 export const INITIAL_STATE: ProjectState = {
   svgs: [],
   selectedId: null,
+}
+
+const parseUnitToPx = (valStr: string | null): string | null => {
+  if (!valStr) return null
+  const match = valStr.match(/^([\d.]+)(mm|cm|in|pt|pc)?$/)
+  if (!match) return valStr
+
+  const value = parseFloat(match[1])
+  const unit = match[2]
+
+  switch (unit) {
+    case 'mm':
+      return `${value * 3.779527559}px`
+    case 'cm':
+      return `${value * 37.79527559}px`
+    case 'in':
+      return `${value * 96}px`
+    case 'pt':
+      return `${value * 1.333333}px`
+    case 'pc':
+      return `${value * 16}px`
+    default:
+      return `${value}px`
+  }
 }
 
 export const useProjectStore = createStore<ProjectStore>()(
@@ -51,6 +76,11 @@ export const useProjectStore = createStore<ProjectStore>()(
             if (svgElement) {
               svgElement.removeAttribute('x')
               svgElement.removeAttribute('y')
+
+              const w = svgElement.getAttribute('width')
+              const h = svgElement.getAttribute('height')
+              if (w) svgElement.setAttribute('width', parseUnitToPx(w) || w)
+              if (h) svgElement.setAttribute('height', parseUnitToPx(h) || h)
 
               const newSvg: SVGData = {
                 id: crypto.randomUUID(),
@@ -89,6 +119,21 @@ export const useProjectStore = createStore<ProjectStore>()(
         selectSvg: (id) =>
           set((state) => {
             state.selectedId = id
+          }),
+
+        duplicateSvg: (id) =>
+          set((state) => {
+            const itemToCopy = state.svgs.find((s) => s.id === id)
+            if (!itemToCopy) return
+
+            const newId = crypto.randomUUID()
+            state.svgs.push({
+              ...itemToCopy,
+              id: newId,
+              x: itemToCopy.x + 20, // INFO: offset position slightly for new svg
+              y: itemToCopy.y + 20,
+            })
+            state.selectedId = newId
           }),
 
         resetProject: () =>
