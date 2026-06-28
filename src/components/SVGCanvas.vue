@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import CanvasItem from '@/components/CanvasItem.vue'
 import { useProjectStore } from '@/stores/useProjectStore'
+import { useCutterStore } from '@/stores/useCutterStore'
 import { useStore } from '@/stores/useStore'
 
 import uploadIconUrl from '@/assets/icons/upload_file.svg'
@@ -12,6 +13,10 @@ const projectStore = useStore(useProjectStore)
 const { uploadSvg, updateSvg, removeSvg, selectSvg, resetProject } = useProjectStore.getState()
 const svgs = computed(() => projectStore.value.svgs)
 const selectedId = computed(() => projectStore.value.selectedId)
+
+const cutterStore = useStore(useCutterStore)
+const cutbedWidth = computed(() => cutterStore.value.cutbed.width)
+const cutbedDepth = computed(() => cutterStore.value.cutbed.depth)
 
 const svgRef = ref<SVGSVGElement | null>(null)
 const viewportRef = ref<SVGGElement | null>(null)
@@ -111,8 +116,7 @@ const handleZoom = (evt: WheelEvent) => {
         <img :src="resetBoxIconUrl" class="btn-icon" alt="Reset Canvas Icon" />
       </button>
 
-      <button class="icon-btn" title="Delete Element" @click="removeActiveSVG"
-        v-if="selectedId">
+      <button class="icon-btn" title="Delete Element" @click="removeActiveSVG" v-if="selectedId">
         <img :src="deleteIconUrl" class="btn-icon" alt="Delete Element" />
       </button>
     </div>
@@ -150,6 +154,16 @@ const handleZoom = (evt: WheelEvent) => {
           :item="item"
           :get-mouse-position="getMousePosition"
         />
+
+        <rect
+          :x="0"
+          :y="0"
+          :width="cutbedWidth"
+          :height="cutbedDepth"
+          rx="1"
+          ry="1"
+          class="cutbed"
+        />
       </g>
     </svg>
   </div>
@@ -177,6 +191,14 @@ const handleZoom = (evt: WheelEvent) => {
 
 .root-svg.dragging {
   cursor: grabbing;
+}
+
+.cutbed {
+  fill: none;
+  stroke: #de6207;
+  stroke-width: 1pt;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 5 5;
 }
 
 .toolbar {

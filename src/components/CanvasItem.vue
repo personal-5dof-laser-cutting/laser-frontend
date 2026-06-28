@@ -20,12 +20,12 @@ const props = defineProps<{
   getMousePosition: (evt: MouseEvent) => { x: number; y: number }
 }>()
 
-const itemRef = ref<SVGGElement | null>(null)
+const contentRef = ref<SVGGElement | null>(null)
 const bBox = ref({ x: 0, y: 0, width: 0, height: 0 })
 
 const updateBBox = () => {
-  if (itemRef.value) {
-    bBox.value = itemRef.value.getBBox()
+  if (contentRef.value) {
+    bBox.value = contentRef.value.getBBox()
   }
 }
 
@@ -43,7 +43,7 @@ watch(
 const startMove = (evt: MouseEvent) => {
   if (evt.button !== 0) return
   evt.stopPropagation()
-  selectSvg(props.item.id)
+  selectSvg(props.item.id as string)
 
   const startMouse = props.getMousePosition(evt)
   const startX = props.item.x
@@ -52,7 +52,7 @@ const startMove = (evt: MouseEvent) => {
   const onMouseMove = (moveEvt: MouseEvent) => {
     const currentMouse = props.getMousePosition(moveEvt)
 
-    updateSvg(props.item.id, {
+    updateSvg(props.item.id as string, {
       x: startX + (currentMouse.x - startMouse.x),
       y: startY + (currentMouse.y - startMouse.y),
     })
@@ -73,16 +73,18 @@ const startRotate = (evt: MouseEvent) => {
 
   const startMouse = props.getMousePosition(evt)
 
-  const initialAngle =
-    Math.atan2(startMouse.y - props.item.y, startMouse.x - props.item.x) * (180 / Math.PI)
+  const centerX = props.item.x + bBox.value.x + bBox.value.width / 2
+  const centerY = props.item.y + bBox.value.y + bBox.value.height / 2
+
+  const initialAngle = Math.atan2(startMouse.y - centerY, startMouse.x - centerX) * (180 / Math.PI)
   const initialRotation = props.item.rotation
 
   const onMouseMove = (moveEvt: MouseEvent) => {
     const currentMouse = props.getMousePosition(moveEvt)
     const currentAngle =
-      Math.atan2(currentMouse.y - props.item.y, currentMouse.x - props.item.x) * (180 / Math.PI)
+      Math.atan2(currentMouse.y - centerY, currentMouse.x - centerX) * (180 / Math.PI)
 
-    updateSvg(props.item.id, {
+    updateSvg(props.item.id as string, {
       rotation: initialRotation + (currentAngle - initialAngle),
     })
   }
@@ -95,17 +97,22 @@ const startRotate = (evt: MouseEvent) => {
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('mouseup', onMouseUp)
 }
+
+const getRotationCenter = computed(() => {
+  const cx = bBox.value.x + bBox.value.width / 2 || 0
+  const cy = bBox.value.y + bBox.value.height / 2 || 0
+  return `${cx}, ${cy}`
+})
 </script>
 
 <template>
   <g
-    ref="itemRef"
-    :transform="`translate(${item.x}, ${item.y}) rotate(${item.rotation})`"
+    :transform="`translate(${item.x}, ${item.y}) rotate(${item.rotation}, ${getRotationCenter})`"
     @mousedown="startMove"
     class="canvas-item"
     :class="{ active: item.id === selectedId }"
   >
-    <g v-html="item.content" />
+    <g v-html="item.content" ref="contentRef" />
 
     <g v-if="item.id === selectedId" class="interface-overlay">
       <rect
