@@ -184,6 +184,7 @@ const handleZoom = (evt: WheelEvent) => {
 .root-svg {
   width: 100%;
   height: 100%;
+  display: block;
   user-select: none;
   cursor: grab;
   vector-effect: non-scaling-stroke;
