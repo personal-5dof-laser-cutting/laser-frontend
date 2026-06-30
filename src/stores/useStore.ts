@@ -1,5 +1,5 @@
-import { readonly, shallowRef, onUnmounted } from 'vue'
-import type { Mutate, StoreApi } from 'zustand/vanilla'
+import { shallowRef, onUnmounted } from 'vue'
+import type { StoreApi } from 'zustand/vanilla'
 
 export function useStore<T>(store: StoreApi<T>) {
   const state = shallowRef(store.getState())

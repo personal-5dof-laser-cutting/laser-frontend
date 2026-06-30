@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useWebsocketStore, ConnectionStatus } from '@/stores/useWebsocketStore'
-import { useStore } from '@/stores/useStore'
 
 describe('useWebsocketStore', () => {
   let mockWebSocketInstance: any
@@ -13,7 +12,7 @@ describe('useWebsocketStore', () => {
 
     mockWebSocketInstance = {
       readyState: 0, // INFO: CONNECTING
-      send: vi.fn(),
+      send: vi.fn<() => void>(),
       close: vi.fn(function (this: any) {
         if (mockWebSocketInstance.onclose) mockWebSocketInstance.onclose()
       }),

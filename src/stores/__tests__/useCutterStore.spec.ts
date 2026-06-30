@@ -3,10 +3,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 // INFO: vitest runs on node that doesn't provide local storage
 vi.hoisted(() => {
   vi.stubGlobal('localStorage', {
-    getItem: vi.fn(() => null),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
+    getItem: vi.fn<() => void>(),
+    setItem: vi.fn<() => void>(),
+    removeItem: vi.fn<() => void>(),
+    clear: vi.fn<() => void>(),
   })
 })
 
