@@ -14,9 +14,17 @@ type AxesState = Record<AxisLabel, AxisData>
 type CutbedLabel = 'width' | 'depth' | 'height'
 type CutbedState = Record<CutbedLabel, number>
 
+type MaterialData = {
+  id: string
+  label: string
+  standard_thicknesses: number[]
+}
+
 interface CutterState {
   axes: AxesState
   cutbed: CutbedState
+  materials: MaterialData[]
+  activeMaterialId: string | null
 }
 
 interface CutterActions {
@@ -25,6 +33,11 @@ interface CutterActions {
 
   updateAxis: (axis: AxisLabel, updates: Partial<AxisData>) => void
   updateCutbed: (dimension: CutbedLabel, value: number) => void
+
+  setMaterial: (material: Partial<MaterialData>) => void
+  updateMaterial: (material_id: string, updates: Partial<MaterialData>) => void
+  deleteMaterial: (material_id: string) => void
+  setActivematerial: (material_id: string) => void
 }
 
 type CutterStore = CutterState & CutterActions
@@ -42,6 +55,8 @@ export const INITIAL_STATE: CutterState = {
     depth: 350,
     height: 15,
   },
+  materials: [],
+  activeMaterialId: null,
 }
 
 export const useCutterStore = createStore<CutterStore>()(
@@ -73,14 +88,50 @@ export const useCutterStore = createStore<CutterStore>()(
           set((state) => {
             Object.assign(state.cutbed, updates)
           }),
+
+        setMaterial: (material) =>
+          set((state) => {
+            const newMaterial: MaterialData = {
+              id: material.id || crypto.randomUUID(),
+              label: material.label || 'New Material',
+              standard_thicknesses: material.standard_thicknesses || [],
+            }
+            state.materials.push(newMaterial)
+          }),
+
+        updateMaterial: (material_id, updates) =>
+          set((state) => {
+            const materialToUpdate = state.materials.find(
+              (m) => m.id === material_id
+            )
+            if (materialToUpdate) {
+              Object.assign(materialToUpdate, updates)
+            }
+          }),
+
+        deleteMaterial: (material_id) =>
+          set((state) => {
+            state.materials = state.materials.filter(
+              (m) => m.id !== material_id
+            )
+
+            if (state.activeMaterialId === material_id) {
+              state.activeMaterialId = ''
+            }
+          }),
+
+        setActivematerial: (material_id) =>
+          set((state) => {
+            state.activeMaterialId = material_id
+          }),
       })),
       {
         name: 'LaserFrontend-Cutter-Storage',
-      },
+      }
     ),
     {
       name: 'LaserFrontend DevTools',
       enabled: true,
-    },
-  ),
+    }
+  )
 )
