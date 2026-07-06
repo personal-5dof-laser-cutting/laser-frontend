@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import IconButton from '@/components/IconButton.vue'
+
 import { useProjectStore } from '@/stores/useProjectStore'
 import { useCutterStore } from '@/stores/useCutterStore'
 import { useStore } from '@/stores/useStore'
@@ -12,52 +14,59 @@ import copyIconUrl from '@/assets/icons/copy.svg'
 import downloadIconUrl from '@/assets/icons/download.svg'
 
 const projectStore = useStore(useProjectStore)
-const { uploadSvg, updateSvg, removeSvg, selectSvg, duplicateSvg, resetProject } =
   useProjectStore.getState()
 const svgs = computed(() => projectStore.value.svgs)
 const selectedId = computed(() => projectStore.value.selectedId)
 
+const handleUpload = (event: Event) => useProjectStore.getState().uploadSvg(event)
+const handleReset = () => useProjectStore.getState().resetProject()
+const handleExport = () => useProjectStore.getState().exportProject()
+
 const duplicateActiveSvg = () => {
   if (!selectedId.value) return
-
-  duplicateSvg(selectedId.value)
+  useProjectStore.getState().duplicateSvg(selectedId.value)
 }
 
 const removeActiveSVG = () => {
   if (!selectedId.value) return
-
-  removeSvg(selectedId.value)
+  useProjectStore.getState().removeSvg(selectedId.value)
 }
-
 </script>
 
 <template>
   <div class="toolbar">
     <label class="icon-btn" title="Upload SVG">
       <img :src="uploadIconUrl" class="btn-icon" alt="Upload Icon" />
-      <input type="file" accept=".svg" @change="uploadSvg" hidden />
+      <input type="file" accept=".svg" @change="handleUpload" hidden />
     </label>
 
-    <button class="icon-btn" title="Reset Canvas" @click="resetProject">
-      <img :src="resetBoxIconUrl" class="btn-icon" alt="Reset Canvas Icon" />
-    </button>
-
-    <button class="icon-btn" title="Delete Element" @click="removeActiveSVG" v-if="selectedId">
-      <img :src="deleteIconUrl" class="btn-icon" alt="Delete Element" />
-    </button>
-
-    <button
-      class="icon-btn"
-      title="Duplicate Element"
-      @click="duplicateActiveSvg"
+    <IconButton
+      title="Reset Canvas"
+      :action="handleReset"
+      :iconPath="resetBoxIconUrl"
+      alt="Reset
+    Canvas"
+    />
+    <IconButton
+      title="Delete Element"
+      :action="removeActiveSVG"
+      :iconPath="deleteIconUrl"
+      alt="Delete Element"
       v-if="selectedId"
-    >
-      <img :src="copyIconUrl" class="btn-icon" alt="Duplicate Element" />
-    </button>
-
-    <button class="icon-btn" title="Export Project" @click="exportToSvg">
-      <img :src="downloadIconUrl" class="btn-icon" alt="Export Project" v-if="svgs" />
-    </button>
+    />
+    <IconButton
+      title="Duplicate Element"
+      :action="duplicateActiveSvg"
+      :iconPath="copyIconUrl"
+      alt="Duplicate Element"
+      v-if="selectedId"
+    />
+    <IconButton
+      title="Export Project"
+      :action="handleExport"
+      :iconPath="downloadIconUrl"
+      alt="Export Project"
+    />
   </div>
 </template>
 

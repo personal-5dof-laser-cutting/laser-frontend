@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import CanvasItem from '@/components/CanvasItem.vue'
 import CanvasToolbar from '@/components/CanvasToolbar.vue'
 import FloatingSidemenu from '@/components/FloatingSidemenu.vue'
-import { useProjectStore } from '@/stores/useProjectStore'
+import { useProjectStore, parseUnitToPx } from '@/stores/useProjectStore'
 import { useCutterStore } from '@/stores/useCutterStore'
 import { useStore } from '@/stores/useStore'
 
@@ -14,8 +14,14 @@ const svgs = computed(() => projectStore.value.svgs)
 const selectedId = computed(() => projectStore.value.selectedId)
 
 const cutterStore = useStore(useCutterStore)
-const cutbedWidth = computed(() => cutterStore.value.cutbed.width)
-const cutbedDepth = computed(() => cutterStore.value.cutbed.depth)
+const cutbedWidth = computed(() => {
+  const valWithUnit = `${cutterStore.value.cutbed.width}mm`
+  return parseUnitToPx(valWithUnit)
+})
+const cutbedDepth = computed(() => {
+  const valWithUnit = `${cutterStore.value.cutbed.depth}mm`
+  return parseUnitToPx(valWithUnit)
+})
 
 const svgRef = ref<SVGSVGElement | null>(null)
 const viewportRef = ref<SVGGElement | null>(null)
@@ -96,50 +102,7 @@ const handleZoom = (evt: WheelEvent) => {
   }
 }
 
-// WARN: 100% vibecoded function
-const exportToSvg = () => {
-  const canvasItems = document.querySelectorAll('.canvas-item')
-  let exportedContent = ''
 
-  canvasItems.forEach((node) => {
-    const clone = node.cloneNode(true) as SVGGElement
-
-    const overlay = clone.querySelector('.interface-overlay')
-    if (overlay) {
-      overlay.remove()
-    }
-
-    clone.classList.remove('active')
-
-    exportedContent += clone.outerHTML + '\n'
-  })
-
-  const pxToMm = 25.4 / 96
-  const physicalWidthMm = (cutbedWidth.value * pxToMm).toFixed(3)
-  const physicalHeightMm = (cutbedDepth.value * pxToMm).toFixed(3)
-
-  const finalSvgString = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="${physicalWidthMm}mm"
-  height="${physicalHeightMm}mm"
-  viewBox="0 0 ${cutbedWidth.value} ${cutbedDepth.value}"
->
-  ${exportedContent}
-</svg>`
-
-  const blob = new Blob([finalSvgString], { type: 'image/svg+xml;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-
-  const link = document.createElement('a')
-  link.href = url
-  link.download = 'cutbed-export.svg'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-
-  URL.revokeObjectURL(url)
-}
 </script>
 
 <template>

@@ -101,9 +101,7 @@ export const useCutterStore = createStore<CutterStore>()(
 
         updateMaterial: (material_id, updates) =>
           set((state) => {
-            const materialToUpdate = state.materials.find(
-              (m) => m.id === material_id
-            )
+            const materialToUpdate = state.materials.find((m) => m.id === material_id)
             if (materialToUpdate) {
               Object.assign(materialToUpdate, updates)
             }
@@ -111,9 +109,7 @@ export const useCutterStore = createStore<CutterStore>()(
 
         deleteMaterial: (material_id) =>
           set((state) => {
-            state.materials = state.materials.filter(
-              (m) => m.id !== material_id
-            )
+            state.materials = state.materials.filter((m) => m.id !== material_id)
 
             if (state.activeMaterialId === material_id) {
               state.activeMaterialId = ''
@@ -127,11 +123,11 @@ export const useCutterStore = createStore<CutterStore>()(
       })),
       {
         name: 'LaserFrontend-Cutter-Storage',
-      }
+      },
     ),
     {
       name: 'LaserFrontend DevTools',
       enabled: true,
-    }
-  )
+    },
+  ),
 )

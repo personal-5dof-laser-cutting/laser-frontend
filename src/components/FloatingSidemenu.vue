@@ -1,21 +1,32 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+
+import { useStore } from '@/stores/useStore'
+import { useCutterStore } from '@/stores/useCutterStore'
+
+const cutterStore = useStore(useCutterStore)
+const materials = computed(() => cutterStore.value.materials)
+const activeMaterialId = computed(() => cutterStore.value.activeMaterialId)
 </script>
 
 <template>
   <div class="menu-container">
     <form>
-  <p>
-    <select id="material-selector">
-      <option value="plywood">Plywood</option>
-    </select>
-  </p>
-</form>
+      <p>
+        <select id="material-selector">
+          <option v-for="item in materials" :key="item.id" value="item.label">
+            {{ item.label }}
+          </option>
+        </select>
+        <button></button>
+      </p>
+    </form>
   </div>
 </template>
 
 <style scoped>
 .menu-container {
- position: absolute;
+  position: absolute;
   top: 20px;
   right: 20px;
   z-index: 10;

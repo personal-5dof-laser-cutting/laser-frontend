@@ -2,6 +2,9 @@ import { createStore } from 'zustand/vanilla'
 import { devtools, persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 
+import { useCutterStore } from '@/stores/useCutterStore'
+import { useStore } from '@/stores/useStore'
+
 export type SVGData = {
   id: string
   content: string
@@ -22,6 +25,8 @@ interface ProjectActions {
   selectSvg: (id: string | null) => void
   duplicateSvg: (id: string) => void
   resetProject: () => void
+  generateSvg: () => string
+  exportProject: () => void
 }
 
 type ProjectStore = ProjectState & ProjectActions
@@ -58,7 +63,7 @@ const parseUnitToPx = (valStr: string | null): string | null => {
 export const useProjectStore = createStore<ProjectStore>()(
   devtools(
     persist(
-      immer((set) => ({
+      immer((get, set) => ({
         ...INITIAL_STATE,
 
         uploadSvg: (event: Event) => {
@@ -140,6 +145,61 @@ export const useProjectStore = createStore<ProjectStore>()(
           set(() => {
             return INITIAL_STATE
           }),
+
+        generateSvg: () => {
+          const { svgs } = get()
+
+          const { cutbed } = useCutterStore.getState()
+          const { width, depth } = cutbed
+
+          let exportedContent = ''
+
+          svgs.forEach((svg) => {
+            exportedContent += `
+              <g transform="translate(${svg.x}, ${svg.y}) rotate(${svg.rotation})">
+                ${svg.content}
+              </g>
+            `
+          })
+
+          const pxToMm = 25.4 / 96
+          const physicalWidthMm = (width * pxToMm).toFixed(3)
+          const physicalHeightMm = (depth * pxToMm).toFixed(3)
+
+          return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="${physicalWidthMm}mm"
+  height="${physicalHeightMm}mm"
+  viewBox="0 0 ${width} ${depth}"
+>
+  <defs>
+    <clipPath id="cutbed-bounds">
+      <rect x="0" y="0" width="${width}" height="${depth}" />
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#cutbed-bounds)">
+    ${exportedContent}
+  </g>
+</svg>`
+        },
+
+        exportProject: () => {
+          const { generateSvg } = get()
+
+          const blob = new Blob([generateSvg()], { type: 'image/svg+xml;charset=utf-8' })
+          const url = URL.createObjectURL(blob)
+
+          const link = document.createElement('a')
+          link.href = url
+          link.download = 'cutbed-export.svg'
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+
+          URL.revokeObjectURL(url)
+        },
       })),
       {
         name: 'LaserFrontend-Project-Storage',
