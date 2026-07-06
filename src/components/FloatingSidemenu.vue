@@ -6,7 +6,6 @@ import { useCutterStore } from '@/stores/useCutterStore'
 import { useWebsocketStore } from '@/stores/useWebsocketStore'
 import { useProjectStore } from '@/stores/useProjectStore'
 
-
 const cutterStore = useStore(useCutterStore)
 const materials = computed(() => cutterStore.value.materials)
 const activeMaterialId = computed(() => cutterStore.value.activeMaterialId)
@@ -17,13 +16,14 @@ const submitJob = () => useProjectStore.getState().submitJob()
 <template>
   <div class="menu-container">
     <form>
-      <p>
+      <p class="material-section">
         <select id="material-selector">
           <option v-for="item in materials" :key="item.id" value="item.label">
             {{ item.label }}
           </option>
         </select>
-        <button>Add</button>
+      </p>
+      <p>
         <button type="button" @click="submitJob">Send</button>
       </p>
     </form>
@@ -48,6 +48,13 @@ const submitJob = () => useProjectStore.getState().submitJob()
   overflow: hidden;
 
   background: black;
+}
+
+.material-section {
+  display: flex;
+  flex-flow: row;
+  width: 100%;
+  gap: 5pt;
 }
 
 #material-selector {

@@ -101,8 +101,6 @@ const handleZoom = (evt: WheelEvent) => {
     y: mousePos.y - (mousePos.y - pan.value.y) * (scale.value / oldScale),
   }
 }
-
-
 </script>
 
 <template>

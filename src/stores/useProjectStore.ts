@@ -185,7 +185,6 @@ export const useProjectStore = createStore<ProjectStore>()(
         },
 
         exportProject: () => {
-
           const { generateSvg } = get()
 
           const blob = new Blob([generateSvg()], { type: 'image/svg+xml;charset=utf-8' })
@@ -205,11 +204,10 @@ export const useProjectStore = createStore<ProjectStore>()(
           const { sendMessage } = useWebsocketStore.getState()
           const { generateSvg } = get()
 
-          const message = {"svg": generateSvg()}
+          const message = { svg: generateSvg() }
 
           sendMessage(message)
         },
-
       })),
       {
         name: 'LaserFrontend-Project-Storage',

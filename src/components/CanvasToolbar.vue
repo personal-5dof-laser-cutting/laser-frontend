@@ -14,7 +14,7 @@ import copyIconUrl from '@/assets/icons/copy.svg'
 import downloadIconUrl from '@/assets/icons/download.svg'
 
 const projectStore = useStore(useProjectStore)
-  useProjectStore.getState()
+useProjectStore.getState()
 const svgs = computed(() => projectStore.value.svgs)
 const selectedId = computed(() => projectStore.value.selectedId)
 
