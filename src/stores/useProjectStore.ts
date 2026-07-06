@@ -3,7 +3,7 @@ import { devtools, persist } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 
 import { useCutterStore } from '@/stores/useCutterStore'
-import { useStore } from '@/stores/useStore'
+import { useWebsocketStore } from '@/stores/useWebsocketStore'
 
 export type SVGData = {
   id: string
@@ -27,6 +27,7 @@ interface ProjectActions {
   resetProject: () => void
   generateSvg: () => string
   exportProject: () => void
+  submitJob: () => void
 }
 
 type ProjectStore = ProjectState & ProjectActions
@@ -36,7 +37,7 @@ export const INITIAL_STATE: ProjectState = {
   selectedId: null,
 }
 
-const parseUnitToPx = (valStr: string | null): string | null => {
+export const parseUnitToPx = (valStr: string | null): string | null => {
   if (!valStr) return null
   const match = valStr.match(/^([\d.]+)(mm|cm|in|pt|pc)?$/)
   if (!match) return valStr
@@ -63,7 +64,7 @@ const parseUnitToPx = (valStr: string | null): string | null => {
 export const useProjectStore = createStore<ProjectStore>()(
   devtools(
     persist(
-      immer((get, set) => ({
+      immer((set, get) => ({
         ...INITIAL_STATE,
 
         uploadSvg: (event: Event) => {
@@ -147,10 +148,9 @@ export const useProjectStore = createStore<ProjectStore>()(
           }),
 
         generateSvg: () => {
-          const { svgs } = get()
-
           const { cutbed } = useCutterStore.getState()
           const { width, depth } = cutbed
+          const { svgs } = get()
 
           let exportedContent = ''
 
@@ -162,16 +162,15 @@ export const useProjectStore = createStore<ProjectStore>()(
             `
           })
 
-          const pxToMm = 25.4 / 96
-          const physicalWidthMm = (width * pxToMm).toFixed(3)
-          const physicalHeightMm = (depth * pxToMm).toFixed(3)
+          const physicalWidthMm = width
+          const physicalHeightMm = depth
 
           return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
   xmlns="http://www.w3.org/2000/svg"
   width="${physicalWidthMm}mm"
   height="${physicalHeightMm}mm"
-  viewBox="0 0 ${width} ${depth}"
+  viewBox="0 0 ${physicalWidthMm} ${physicalHeightMm}"
 >
   <defs>
     <clipPath id="cutbed-bounds">
@@ -186,6 +185,7 @@ export const useProjectStore = createStore<ProjectStore>()(
         },
 
         exportProject: () => {
+
           const { generateSvg } = get()
 
           const blob = new Blob([generateSvg()], { type: 'image/svg+xml;charset=utf-8' })
@@ -200,6 +200,16 @@ export const useProjectStore = createStore<ProjectStore>()(
 
           URL.revokeObjectURL(url)
         },
+
+        submitJob: () => {
+          const { sendMessage } = useWebsocketStore.getState()
+          const { generateSvg } = get()
+
+          const message = {"svg": generateSvg()}
+
+          sendMessage(message)
+        },
+
       })),
       {
         name: 'LaserFrontend-Project-Storage',

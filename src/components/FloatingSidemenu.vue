@@ -3,10 +3,15 @@ import { ref, computed } from 'vue'
 
 import { useStore } from '@/stores/useStore'
 import { useCutterStore } from '@/stores/useCutterStore'
+import { useWebsocketStore } from '@/stores/useWebsocketStore'
+import { useProjectStore } from '@/stores/useProjectStore'
+
 
 const cutterStore = useStore(useCutterStore)
 const materials = computed(() => cutterStore.value.materials)
 const activeMaterialId = computed(() => cutterStore.value.activeMaterialId)
+
+const submitJob = () => useProjectStore.getState().submitJob()
 </script>
 
 <template>
@@ -18,7 +23,8 @@ const activeMaterialId = computed(() => cutterStore.value.activeMaterialId)
             {{ item.label }}
           </option>
         </select>
-        <button></button>
+        <button>Add</button>
+        <button type="button" @click="submitJob">Send</button>
       </p>
     </form>
   </div>
