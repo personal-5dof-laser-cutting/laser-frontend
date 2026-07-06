@@ -151,29 +151,29 @@ const getRotationCenter = computed(() => {
 
 .selection-box {
   fill: none;
-  stroke: #de6207;
-  stroke-width: 2pt;
+  stroke: var(--color-accent);
+  stroke-width: 1pt;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 
 .handle-line {
-  stroke: #de6207;
-  stroke-width: 2pt;
+  stroke: var(--color-accent);
+  stroke-width: 1pt;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 
 .rotate-handle {
   fill: var(--color-background);
-  stroke: #de6207;
+  stroke: var(--color-accent);
   stroke-width: 5pt;
   vector-effect: non-scaling-stroke;
   cursor: alias;
 }
 
 .rotate-handle:hover {
-  fill: #de6207;
+  fill: var(--color-accent);
   transition: 0.1s ease-out;
 }
 </style>

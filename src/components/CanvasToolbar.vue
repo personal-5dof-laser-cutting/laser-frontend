@@ -73,18 +73,19 @@ const removeActiveSVG = () => {
 <style scoped>
 .toolbar {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: var(--margin-mid);
+  left: var(--margin-mid);
   z-index: 10;
   display: flex;
   flex-flow: row;
-  gap: 12px;
+  gap: var(--gap-mid);
 }
 
 .icon-btn {
   background-color: var(--color-background-soft);
-  border: 1px solid grey;
-  border-radius: 5px;
+  border: 1px solid var(--color-border-panel);
+  border-radius: var(--border-radius-panel-element);
+  background-color: var(--color-background-panel);
   color: var(--color-text);
   cursor: pointer;
   width: 48pt;

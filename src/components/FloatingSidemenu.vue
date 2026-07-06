@@ -33,36 +33,37 @@ const submitJob = () => useProjectStore.getState().submitJob()
 <style scoped>
 .menu-container {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: var(--margin-mid);
+  right: var(--margin-mid);
   z-index: 10;
   display: flex;
   flex-flow: column;
   flex-grow: 1;
-  gap: 12px;
 
-  width: 300px;
-  padding: 15pt;
+  width: 250pt;
+  padding: var(--padding-mid);
   margin-left: auto;
 
   overflow: hidden;
 
-  background: black;
+  background: var(--color-background-panel);
+  border-radius: var(--broder-radius-panel);
+  border: 1pt solid var(--color-border-panel);
 }
 
 .material-section {
   display: flex;
   flex-flow: row;
   width: 100%;
-  gap: 5pt;
+
+  background: var(--color-background-panel-element);
 }
 
 #material-selector {
   width: 100%;
-  background: var(--color-background-mute);
   color: var(--color-text);
-  padding: 5pt;
-  border: 1pt solid var(--color-border);
-  border-radius: 5pt;
+  padding: var(--padding-small);
+  border: 1pt solid var(--color-border-panel-element);
+  border-radius: var(--border-radius-panel-element);
 }
 </style>

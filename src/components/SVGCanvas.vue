@@ -182,7 +182,7 @@ const handleZoom = (evt: WheelEvent) => {
 
 .cutbed {
   fill: none;
-  stroke: #de6207;
+  stroke: var(--color-accent);
   stroke-width: 1pt;
   vector-effect: non-scaling-stroke;
   stroke-dasharray: 5 5;
