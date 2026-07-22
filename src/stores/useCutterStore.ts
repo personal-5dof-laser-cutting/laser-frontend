@@ -17,7 +17,7 @@ type CutbedState = Record<CutbedLabel, number>
 type MaterialData = {
   id: string
   label: string
-  standard_thicknesses: number[]
+  standard_thickness: number
 }
 
 interface CutterState {
@@ -41,6 +41,16 @@ interface CutterActions {
 }
 
 type CutterStore = CutterState & CutterActions
+const response = await fetch("http://127.0.0.1:8000/get_materials")
+let backendMaterials = []
+if (!response.ok) {
+  console.error(response.statusText)
+} else {
+  backendMaterials = await response.json()
+  console.log(backendMaterials)
+
+}
+
 
 export const INITIAL_STATE: CutterState = {
   axes: {
@@ -55,7 +65,7 @@ export const INITIAL_STATE: CutterState = {
     depth: 350,
     height: 15,
   },
-  materials: [],
+  materials: backendMaterials,
   activeMaterialId: null,
 }
 
@@ -94,7 +104,7 @@ export const useCutterStore = createStore<CutterStore>()(
             const newMaterial: MaterialData = {
               id: material.id || crypto.randomUUID(),
               label: material.label || 'New Material',
-              standard_thicknesses: material.standard_thicknesses || [],
+              standard_thickness: material.standard_thickness || 5,
             }
             state.materials.push(newMaterial)
           }),
