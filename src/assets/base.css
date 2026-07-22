@@ -21,6 +21,7 @@
 :root {
   --color-background: var(--vt-c-white);
   --color-background-panel: var(--vt-c-light-grey);
+  --color-text-panel: var(--vt-c-white);
   --color-background-panel-element: var(--vt-c-white-muted);
   --color-border-panel: var(--vt-c-mid-grey);
 

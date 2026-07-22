@@ -13,6 +13,15 @@ export type SVGData = {
   rotation: number
 }
 
+export type Parameters = {
+  material: string
+  material_thickness: number
+  dpi: number
+  cut_speed: number
+  laser_off: boolean
+  optimize: boolean
+}
+
 interface ProjectState {
   svgs: SVGData[]
   selectedId: string | null
@@ -27,7 +36,7 @@ interface ProjectActions {
   resetProject: () => void
   generateSvg: () => string
   exportProject: () => void
-  submitJob: () => void
+  submitJob: (params: Parameters) => void
 }
 
 type ProjectStore = ProjectState & ProjectActions
@@ -41,8 +50,7 @@ export const parseUnitToPx = (valStr: string | null): string | null => {
   if (!valStr) return null
   const match = valStr.match(/^([\d.]+)(mm|cm|in|pt|pc)?$/)
   if (!match) return valStr
-
-  const value = parseFloat(match[1])
+  const value = parseFloat(match[1] ?? "-1")
   const unit = match[2]
 
   switch (unit) {
@@ -200,11 +208,11 @@ export const useProjectStore = createStore<ProjectStore>()(
           URL.revokeObjectURL(url)
         },
 
-        submitJob: () => {
+        submitJob: (params: Parameters) => {
           const { sendMessage } = useWebsocketStore.getState()
           const { generateSvg } = get()
 
-          const message = { svg: generateSvg() }
+          const message = { type: "job", content: JSON.stringify({svg: generateSvg(), ...params })}
 
           sendMessage(message)
         },
