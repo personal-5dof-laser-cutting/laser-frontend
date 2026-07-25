@@ -212,7 +212,7 @@ export const useProjectStore = createStore<ProjectStore>()(
           const { sendMessage } = useWebsocketStore.getState()
           const { generateSvg } = get()
 
-          const message = { type: "job", content: JSON.stringify({svg: generateSvg(), ...params })}
+          const message = { type: "job", input: {svg: generateSvg(), ...params }}
 
           sendMessage(message)
         },

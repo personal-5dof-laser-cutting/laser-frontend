@@ -12,15 +12,24 @@ const materials = computed(() => cutterStore.value.materials)
 const activeMaterialId = computed(() => cutterStore.value.activeMaterialId)
 
 const materialThickness = ref(7)
-const submitJob = () => useProjectStore.getState().submitJob({material: "wood", material_thickness: materialThickness.value, dpi: 72, cut_speed: 20, laser_off: true, optimize: false})
+const cutSpeed = ref(20)
+const laserOff = ref(false)
+const optimize = ref(true)
+const submitJob = () => useProjectStore.getState().submitJob({material: activeMaterialId.value, material_thickness: materialThickness.value, dpi: 72, cut_speed: cutSpeed.value, laser_off: laserOff.value, optimize: optimize.value});
+
+const handleMaterialChange = (event: Event)  => {
+  const target: HTMLSelectElement = event.target as HTMLSelectElement;
+  cutterStore.value.setActiveMaterial(target.value)
+}
+
 </script>
 
 <template>
   <div class="menu-container">
     <form>
       <p class="material-section">
-        <select id="material-selector">
-          <option v-for="item in materials" :key="item.id" value="item.label">
+        <select id="material-selector" :value="activeMaterialId" @change="handleMaterialChange">
+          <option v-for="item in materials" :key="item.id" :value="item.label">
             {{ item.label }}
           </option>
         </select>
@@ -28,6 +37,18 @@ const submitJob = () => useProjectStore.getState().submitJob({material: "wood", 
       <p class="input-section">
         <label for="material-height">Material thickness:</label>
         <input type="number", id="material-height" v-model="materialThickness">
+      </p>
+      <p class="input-section">
+        <label for="cut-speed">Cut speed (mm/s):</label>
+        <input type="number", id="cut-speed" v-model="cutSpeed">
+      </p>
+      <p>
+        <label for="laser-off">Laser off:</label>
+        <input type="checkbox" name="laser-off" id="laser-off" :checked="laserOff">
+      </p>
+      <p>
+        <label for="optimize">Optimize:</label>
+        <input type="checkbox" name="optimize" id="optimize" :checked="optimize">
       </p>
       <p>
         <button type="button" @click="submitJob">Send</button>

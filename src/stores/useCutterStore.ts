@@ -24,7 +24,7 @@ interface CutterState {
   axes: AxesState
   cutbed: CutbedState
   materials: MaterialData[]
-  activeMaterialId: string | null
+  activeMaterialId: string
 }
 
 interface CutterActions {
@@ -37,18 +37,16 @@ interface CutterActions {
   setMaterial: (material: Partial<MaterialData>) => void
   updateMaterial: (material_id: string, updates: Partial<MaterialData>) => void
   deleteMaterial: (material_id: string) => void
-  setActivematerial: (material_id: string) => void
+  setActiveMaterial: (material_id: string) => void
 }
 
 type CutterStore = CutterState & CutterActions
-const response = await fetch("http://127.0.0.1:8000/get_materials")
+const materialResponse = await fetch("http://127.0.0.1:8000/get_materials")
 let backendMaterials = []
-if (!response.ok) {
-  console.error(response.statusText)
+if (!materialResponse.ok) {
+  console.error(materialResponse.statusText)
 } else {
-  backendMaterials = await response.json()
-  console.log(backendMaterials)
-
+  backendMaterials = await materialResponse.json()
 }
 
 
@@ -66,7 +64,7 @@ export const INITIAL_STATE: CutterState = {
     height: 15,
   },
   materials: backendMaterials,
-  activeMaterialId: null,
+  activeMaterialId: backendMaterials[0].id,
 }
 
 export const useCutterStore = createStore<CutterStore>()(
@@ -126,7 +124,7 @@ export const useCutterStore = createStore<CutterStore>()(
             }
           }),
 
-        setActivematerial: (material_id) =>
+        setActiveMaterial: (material_id) =>
           set((state) => {
             state.activeMaterialId = material_id
           }),
