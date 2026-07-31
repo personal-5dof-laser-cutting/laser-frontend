@@ -20,7 +20,7 @@ const cutbedWidth = computed(() => {
 })
 const cutbedDepth = computed(() => {
   const valWithUnit = `${cutterStore.value.cutbed.depth}mm`
-  return parseUnitToPx(valWithUnit)
+  return parseUnitToPx(valWithUnit) as string
 })
 
 const svgRef = ref<SVGSVGElement | null>(null)
