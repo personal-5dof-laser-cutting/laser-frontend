@@ -37,6 +37,8 @@ interface ProjectActions {
   generateSvg: () => string
   exportProject: () => void
   submitJob: (params: Parameters) => void
+  homeCutter: () => void
+  abortCut: () => void
 }
 
 type ProjectStore = ProjectState & ProjectActions
@@ -216,6 +218,20 @@ export const useProjectStore = createStore<ProjectStore>()(
 
           sendMessage(message)
         },
+
+        homeCutter: () => {
+          const { sendMessage } = useWebsocketStore.getState()
+          const message = { type: "action", action: "home"}
+
+          sendMessage(message)
+        },
+
+        abortCut: () => {
+          const { sendMessage } = useWebsocketStore.getState()
+          const message = { type: "action", action: "abort"}
+
+          sendMessage(message)
+        }
       })),
       {
         name: 'LaserFrontend-Project-Storage',

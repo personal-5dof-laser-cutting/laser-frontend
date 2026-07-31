@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import CanvasItem from '@/components/CanvasItem.vue'
 import CanvasToolbar from '@/components/CanvasToolbar.vue'
+import CanvasActionbar from './CanvasActionbar.vue'
 import FloatingSidemenu from '@/components/FloatingSidemenu.vue'
 import { useProjectStore, parseUnitToPx } from '@/stores/useProjectStore'
 import { useCutterStore } from '@/stores/useCutterStore'
@@ -16,7 +17,7 @@ const selectedId = computed(() => projectStore.value.selectedId)
 const cutterStore = useStore(useCutterStore)
 const cutbedWidth = computed(() => {
   const valWithUnit = `${cutterStore.value.cutbed.width}mm`
-  return parseUnitToPx(valWithUnit)
+  return parseUnitToPx(valWithUnit) as string
 })
 const cutbedDepth = computed(() => {
   const valWithUnit = `${cutterStore.value.cutbed.depth}mm`
@@ -152,6 +153,7 @@ const handleZoom = (evt: WheelEvent) => {
         />
       </g>
     </svg>
+    <CanvasActionbar />
   </div>
 </template>
 
