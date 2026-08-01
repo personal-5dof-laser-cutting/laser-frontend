@@ -4,7 +4,7 @@ import CanvasItem from '@/components/CanvasItem.vue'
 import CanvasToolbar from '@/components/CanvasToolbar.vue'
 import CanvasActionbar from './CanvasActionbar.vue'
 import FloatingSidemenu from '@/components/FloatingSidemenu.vue'
-import { useProjectStore, parseUnitToPx } from '@/stores/useProjectStore'
+import { useProjectStore } from '@/stores/useProjectStore'
 import { useCutterStore } from '@/stores/useCutterStore'
 import { useStore } from '@/stores/useStore'
 
@@ -16,12 +16,10 @@ const selectedId = computed(() => projectStore.value.selectedId)
 
 const cutterStore = useStore(useCutterStore)
 const cutbedWidth = computed(() => {
-  const valWithUnit = `${cutterStore.value.cutbed.width}mm`
-  return parseUnitToPx(valWithUnit) as string
+  return cutterStore.value.cutbed.width
 })
 const cutbedDepth = computed(() => {
-  const valWithUnit = `${cutterStore.value.cutbed.depth}mm`
-  return parseUnitToPx(valWithUnit) as string
+  return cutterStore.value.cutbed.depth
 })
 
 const svgRef = ref<SVGSVGElement | null>(null)

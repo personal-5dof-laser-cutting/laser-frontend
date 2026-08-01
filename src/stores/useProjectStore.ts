@@ -48,26 +48,25 @@ export const INITIAL_STATE: ProjectState = {
   selectedId: null,
 }
 
-export const parseUnitToPx = (valStr: string | null): string | null => {
-  if (!valStr) return null
-  const match = valStr.match(/^([\d.]+)(mm|cm|in|pt|pc)?$/)
-  if (!match) return valStr
-  const value = parseFloat(match[1] ?? "-1")
+function pxToMm(px: number, dpi: number): number {
+  return (px / dpi) * 25.4
+}
+
+function unitToMm(value: string | null, dpi: number | null = null): number | null {
+  if (!value) return null
+  const match = value.trim().match(/^([\d.]+)\s*(mm|cm|in|pt|pc)?$/)
+  if (!match || !match[1]) return null
+
+  const num = parseFloat(match[1])
   const unit = match[2]
 
   switch (unit) {
-    case 'mm':
-      return `${value * 3.779527559}px`
-    case 'cm':
-      return `${value * 37.79527559}px`
-    case 'in':
-      return `${value * 96}px`
-    case 'pt':
-      return `${value * 1.333333}px`
-    case 'pc':
-      return `${value * 16}px`
-    default:
-      return `${value}px`
+    case 'mm': return num
+    case 'cm': return num * 10
+    case 'in': return num * 25.4
+    case 'pt': return num * (25.4 / 72)
+    case 'pc': return num * (25.4 / 6)
+    default: return dpi ? pxToMm(num, dpi) : null // px or unitless — not reliable and no dpi probided, caller must decide fallback
   }
 }
 
@@ -93,10 +92,26 @@ export const useProjectStore = createStore<ProjectStore>()(
               svgElement.removeAttribute('x')
               svgElement.removeAttribute('y')
 
+              const vbWidth = svgElement.viewBox?.baseVal?.width ?? 0
+              const vbHeight = svgElement.viewBox?.baseVal?.height ?? 0
+
               const w = svgElement.getAttribute('width')
               const h = svgElement.getAttribute('height')
-              if (w) svgElement.setAttribute('width', parseUnitToPx(w) || w)
-              if (h) svgElement.setAttribute('height', parseUnitToPx(h) || h)
+
+              let widthMm = unitToMm(w)
+              let heightMm = unitToMm(h)
+
+              if (!widthMm || !heightMm) {
+                let passedDPI: number
+                do {
+                  passedDPI = parseFloat(prompt("Please enter the SVG's DPI:") || "")
+                } while(isNaN(passedDPI))
+                  widthMm = unitToMm(w, passedDPI)
+                  heightMm = unitToMm(w, passedDPI)
+              }
+
+              if (w) svgElement.setAttribute('width', String(widthMm))
+              if (h) svgElement.setAttribute('height', String(heightMm))
 
               const newSvg: SVGData = {
                 id: crypto.randomUUID(),
@@ -166,9 +181,9 @@ export const useProjectStore = createStore<ProjectStore>()(
 
           svgs.forEach((svg) => {
             exportedContent += `
-              <g transform="translate(${svg.x}, ${svg.y}) rotate(${svg.rotation})">
-                ${svg.content}
-              </g>
+<g transform="translate(${svg.x}, ${svg.y}) rotate(${svg.rotation})">
+  ${svg.content}
+</g>
             `
           })
 
