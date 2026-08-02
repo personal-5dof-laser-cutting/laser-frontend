@@ -19,6 +19,7 @@
     "immer": "^11.1.8",
     "vue": "^3.5.32",
     "vue-router": "^5.0.4",
+    "vue-toastification": "^2.0.0-rc.5",
     "zustand": "^5.0.14"
   },
   "devDependencies": {

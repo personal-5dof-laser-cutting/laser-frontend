@@ -49,6 +49,15 @@ if (!materialResponse.ok) {
   backendMaterials = await materialResponse.json()
 }
 
+const cutbedResponse = await fetch("http://127.0.0.1:8000/get_cutbed_dimensions")
+let cutbed_width: number = 400
+let cutbed_height: number = 400
+if (!cutbedResponse.ok) {
+  console.error(cutbedResponse.statusText)
+} else {
+  [cutbed_width, cutbed_height] = await cutbedResponse.json()
+}
+
 
 export const INITIAL_STATE: CutterState = {
   axes: {
@@ -59,8 +68,8 @@ export const INITIAL_STATE: CutterState = {
     b: { homed: false, current_value: null, target_value: null },
   },
   cutbed: {
-    width: 398,
-    depth: 398,
+    width: cutbed_width,
+    depth: cutbed_height,
     height: 15,
   },
   materials: backendMaterials,

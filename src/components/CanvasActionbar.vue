@@ -10,10 +10,15 @@ import homingIconUrl from '@/assets/icons/home.svg'
 import abortIconUrl from '@/assets/icons/abort.svg'
 
 const projectStore = useStore(useProjectStore)
-useProjectStore.getState()
 
-const homeCutter = () => useProjectStore.getState().homeCutter()
-const abortCut = () => useProjectStore.getState().abortCut()
+const homeCutter = () => {
+  projectStore.value.resetProgress()
+  return projectStore.value.homeCutter()
+}
+const abortCut = () => {
+  projectStore.value.resetProgress()
+  return projectStore.value.abortCut()
+}
 </script>
 
 <template>

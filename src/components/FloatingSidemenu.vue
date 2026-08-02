@@ -7,6 +7,7 @@ import { useWebsocketStore } from '@/stores/useWebsocketStore'
 import { useProjectStore } from '@/stores/useProjectStore'
 
 const cutterStore = useStore(useCutterStore)
+const projectStore = useStore(useProjectStore)
 
 const materials = computed(() => cutterStore.value.materials)
 const activeMaterialId = computed(() => cutterStore.value.activeMaterialId)
@@ -15,7 +16,10 @@ const materialThickness = ref(7)
 const cutSpeed = ref(20)
 const laserOff = ref(false)
 const optimize = ref(true)
-const submitJob = () => useProjectStore.getState().submitJob({material: activeMaterialId.value, material_thickness: materialThickness.value, dpi: 72, cut_speed: cutSpeed.value, laser_off: laserOff.value, optimize: optimize.value});
+const submitJob = () => {
+  projectStore.value.resetProgress()
+  return projectStore.value.submitJob({ material: activeMaterialId.value, material_thickness: materialThickness.value, dpi: 72, cut_speed: cutSpeed.value, laser_off: laserOff.value, optimize: optimize.value })
+};
 
 const handleMaterialChange = (event: Event)  => {
   const target: HTMLSelectElement = event.target as HTMLSelectElement;

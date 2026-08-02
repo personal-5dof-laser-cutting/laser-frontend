@@ -25,6 +25,8 @@ export type Parameters = {
 interface ProjectState {
   svgs: SVGData[]
   selectedId: string | null
+  progressTotal: number
+  progress: number | null
 }
 
 interface ProjectActions {
@@ -39,6 +41,9 @@ interface ProjectActions {
   submitJob: (params: Parameters) => void
   homeCutter: () => void
   abortCut: () => void
+  setProgressTotal: (number_commands: number) => void
+  updateProgress: () => void
+  resetProgress: () => void
 }
 
 type ProjectStore = ProjectState & ProjectActions
@@ -46,6 +51,8 @@ type ProjectStore = ProjectState & ProjectActions
 export const INITIAL_STATE: ProjectState = {
   svgs: [],
   selectedId: null,
+  progressTotal: 0,
+  progress: null,
 }
 
 function pxToMm(px: number, dpi: number): number {
@@ -246,7 +253,26 @@ export const useProjectStore = createStore<ProjectStore>()(
           const message = { type: "action", action: "abort"}
 
           sendMessage(message)
-        }
+        },
+
+        setProgressTotal: (number_commands) =>
+          set((state) => {
+            state.progressTotal = number_commands;
+            state.progress = 0;
+          }),
+
+        updateProgress: () =>
+          set((state) => {
+            if (state.progress != null && state.progress < state.progressTotal) {
+              state.progress++
+            }
+          }),
+
+        resetProgress: () =>
+          set((state) => {
+            state.progress = null
+            state.progressTotal = 0
+          })
       })),
       {
         name: 'LaserFrontend-Project-Storage',
