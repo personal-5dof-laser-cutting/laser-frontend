@@ -35,6 +35,8 @@ watch(() => websocketStore.value.lastMessage, (message: WebsocketMessage | null)
         toast.info(message.content)
       }
       break
+    default:
+      console.error(`Message type ${message.type} not implemented`)
   }
 })
 </script>

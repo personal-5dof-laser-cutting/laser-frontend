@@ -5,22 +5,7 @@ import { immer } from 'zustand/middleware/immer'
 import { useCutterStore } from '@/stores/useCutterStore'
 import { useWebsocketStore } from '@/stores/useWebsocketStore'
 
-export type SVGData = {
-  id: string
-  content: string
-  x: number
-  y: number
-  rotation: number
-}
-
-export type Parameters = {
-  material: string
-  material_thickness: number
-  dpi: number
-  cut_speed: number
-  laser_off: boolean
-  optimize: boolean
-}
+import type { Parameters, SVGData, WebsocketMessage } from '@/types/websocket'
 
 interface ProjectState {
   svgs: SVGData[]

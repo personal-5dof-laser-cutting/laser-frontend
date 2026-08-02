@@ -1,6 +1,7 @@
 import { createStore } from 'zustand/vanilla'
 import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
+import type { WebsocketMessage } from '@/types/websocket'
 
 export enum ConnectionStatus {
   DISCONNECTED = 'disconnected',
@@ -83,12 +84,12 @@ export const useWebsocketStore = createStore<ConnectionStore>()(
         }
       },
 
-      sendMessage: (message: any) => {
+      sendMessage: (message: WebsocketMessage) => {
         if (!socket || socket.readyState !== WebSocket.OPEN) {
           console.warn('Cannot send message: WebSocket is not connected.')
           return
         }
-        const payload = typeof message === 'string' ? message : JSON.stringify(message)
+        const payload = JSON.stringify(message)
         socket.send(payload)
       },
 
