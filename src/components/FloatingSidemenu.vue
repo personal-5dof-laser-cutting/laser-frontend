@@ -3,7 +3,6 @@ import { ref, computed } from 'vue'
 
 import { useStore } from '@/stores/useStore'
 import { useCutterStore } from '@/stores/useCutterStore'
-import { useWebsocketStore } from '@/stores/useWebsocketStore'
 import { useProjectStore } from '@/stores/useProjectStore'
 
 const cutterStore = useStore(useCutterStore)

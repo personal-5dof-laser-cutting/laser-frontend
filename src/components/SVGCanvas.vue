@@ -9,10 +9,9 @@ import { useCutterStore } from '@/stores/useCutterStore'
 import { useStore } from '@/stores/useStore'
 
 const projectStore = useStore(useProjectStore)
-const { uploadSvg, updateSvg, removeSvg, selectSvg, duplicateSvg, resetProject } =
+const { selectSvg } =
   useProjectStore.getState()
 const svgs = computed(() => projectStore.value.svgs)
-const selectedId = computed(() => projectStore.value.selectedId)
 
 const cutterStore = useStore(useCutterStore)
 const cutbedWidth = computed(() => {

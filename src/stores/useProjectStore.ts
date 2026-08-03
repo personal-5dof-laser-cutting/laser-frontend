@@ -5,7 +5,7 @@ import { immer } from 'zustand/middleware/immer'
 import { useCutterStore } from '@/stores/useCutterStore'
 import { useWebsocketStore } from '@/stores/useWebsocketStore'
 
-import type { Parameters, SVGData, WebsocketMessage } from '@/types/websocket'
+import type { Parameters, SVGData } from '@/types/websocket'
 
 interface ProjectState {
   svgs: SVGData[]

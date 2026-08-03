@@ -109,7 +109,7 @@ export const useWebsocketStore = createStore<ConnectionStore>()(
     })),
     {
       name: 'LaserFrontend DevTools',
-      enabled: process.env.NODE_ENV !== 'production',
+      enabled: import.meta.env.DEV,
     },
   ),
 )

@@ -4,7 +4,6 @@ import { computed } from 'vue'
 import IconButton from '@/components/IconButton.vue'
 
 import { useProjectStore } from '@/stores/useProjectStore'
-import { useCutterStore } from '@/stores/useCutterStore'
 import { useStore } from '@/stores/useStore'
 
 import uploadIconUrl from '@/assets/icons/upload_file.svg'
