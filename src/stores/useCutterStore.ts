@@ -14,6 +14,9 @@ type AxesState = Record<AxisLabel, AxisData>
 type CutbedLabel = 'width' | 'depth' | 'height'
 type CutbedState = Record<CutbedLabel, number>
 
+type ToolheadLabel = 'x' | 'y'
+type ToolheadState = Record<ToolheadLabel, number>
+
 type MaterialData = {
   id: string
   label: string
@@ -25,19 +28,23 @@ interface CutterState {
   cutbed: CutbedState
   materials: MaterialData[]
   activeMaterialId: string
+  toolheadPosition: ToolheadState
 }
 
 interface CutterActions {
   setAxes: (axes: Partial<Record<AxisLabel, Partial<AxisData>>>) => void
   setCutbed: (cutbed: Partial<CutbedState>) => void
+  setMaterial: (material: Partial<MaterialData>) => void
+  setActiveMaterial: (material_id: string) => void
+  setToolheadPosition: (position: ToolheadState) => void
 
   updateAxis: (axis: AxisLabel, updates: Partial<AxisData>) => void
   updateCutbed: (dimension: CutbedLabel, value: number) => void
 
-  setMaterial: (material: Partial<MaterialData>) => void
   updateMaterial: (material_id: string, updates: Partial<MaterialData>) => void
   deleteMaterial: (material_id: string) => void
-  setActiveMaterial: (material_id: string) => void
+
+
 }
 
 type CutterStore = CutterState & CutterActions
@@ -74,6 +81,7 @@ export const INITIAL_STATE: CutterState = {
   },
   materials: backendMaterials,
   activeMaterialId: backendMaterials[0].id,
+  toolheadPosition: {x: 0, y: cutbed_height}
 }
 
 export const useCutterStore = createStore<CutterStore>()(
@@ -137,6 +145,12 @@ export const useCutterStore = createStore<CutterStore>()(
           set((state) => {
             state.activeMaterialId = material_id
           }),
+
+
+        setToolheadPosition: (position: ToolheadState) =>
+          set((state) => {
+            state.toolheadPosition = {x: position.x, y: position.y}
+          })
       })),
       {
         name: 'LaserFrontend-Cutter-Storage',

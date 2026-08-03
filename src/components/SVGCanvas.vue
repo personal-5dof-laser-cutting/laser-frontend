@@ -8,18 +8,19 @@ import { useProjectStore } from '@/stores/useProjectStore'
 import { useCutterStore } from '@/stores/useCutterStore'
 import { useStore } from '@/stores/useStore'
 
+import laserpointerIconUrl from '@/assets/icons/laser_pointer.svg'
+
 const projectStore = useStore(useProjectStore)
 const { selectSvg } =
   useProjectStore.getState()
 const svgs = computed(() => projectStore.value.svgs)
 
 const cutterStore = useStore(useCutterStore)
-const cutbedWidth = computed(() => {
-  return cutterStore.value.cutbed.width
-})
-const cutbedDepth = computed(() => {
-  return cutterStore.value.cutbed.depth
-})
+const cutbedWidth = computed(() => cutterStore.value.cutbed.width)
+const cutbedDepth = computed(() => cutterStore.value.cutbed.depth)
+
+const toolheadPosition = computed(() => cutterStore.value.toolheadPosition)
+const laserpointerDim = 20
 
 const svgRef = ref<SVGSVGElement | null>(null)
 const viewportRef = ref<SVGGElement | null>(null)
@@ -131,22 +132,30 @@ const handleZoom = (evt: WheelEvent) => {
           fill="url(#grid-pattern)"
           @click="selectSvg(null)"
         />
-
+        
         <CanvasItem
-          v-for="item in svgs"
-          :key="item.id"
-          :item="item"
-          :get-mouse-position="getMousePosition"
+        v-for="item in svgs"
+        :key="item.id"
+        :item="item"
+        :get-mouse-position="getMousePosition"
+        />
+        
+        <rect
+        :x="0"
+        :y="0"
+        :width="cutbedWidth"
+        :height="cutbedDepth"
+        rx="1"
+        ry="1"
+        class="cutbed"
         />
 
-        <rect
-          :x="0"
-          :y="0"
-          :width="cutbedWidth"
-          :height="cutbedDepth"
-          rx="1"
-          ry="1"
-          class="cutbed"
+        <image
+          :href="laserpointerIconUrl"
+          :x="toolheadPosition.x - laserpointerDim/2"
+          :y="toolheadPosition.y - laserpointerDim/2"
+          :width="laserpointerDim"
+          :height="laserpointerDim"
         />
       </g>
     </svg>
