@@ -157,7 +157,7 @@ const handleZoom = (evt: WheelEvent) => {
         <image
           :href="laserpointerIconUrl"
           :x="toolheadPosition.x - laserpointerDim/2"
-          :y="toolheadPosition.y - laserpointerDim/2"
+          :y="cutbedDepth - (toolheadPosition.y - laserpointerDim/2)"
           :width="laserpointerDim"
           :height="laserpointerDim"
         />
