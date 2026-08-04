@@ -2,8 +2,6 @@
 import { ref, computed } from 'vue'
 import CanvasItem from '@/components/CanvasItem.vue'
 import CanvasToolbar from '@/components/CanvasToolbar.vue'
-import CanvasActionbar from './CanvasActionbar.vue'
-import FloatingSidemenu from '@/components/FloatingSidemenu.vue'
 import { useProjectStore } from '@/stores/useProjectStore'
 import { useCutterStore } from '@/stores/useCutterStore'
 import { useStore } from '@/stores/useStore'
@@ -21,6 +19,17 @@ const cutbedDepth = computed(() => cutterStore.value.cutbed.depth)
 
 const toolheadPosition = computed(() => cutterStore.value.toolheadPosition)
 const laserpointerDim = 20
+
+// Frame the cutbed with a small even margin so the workplane fills as much of
+// the canvas as it can; `preserveAspectRatio` then centres it in whatever
+// aspect ratio the viewport happens to have.
+const viewBox = computed(() => {
+  const width = cutbedWidth.value || 400
+  const depth = cutbedDepth.value || 400
+  const margin = Math.max(width, depth) * 0.06
+
+  return `${-margin} ${-margin} ${width + 2 * margin} ${depth + 2 * margin}`
+})
 
 const svgRef = ref<SVGSVGElement | null>(null)
 const viewportRef = ref<SVGGElement | null>(null)
@@ -105,9 +114,9 @@ const handleZoom = (evt: WheelEvent) => {
 <template>
   <div class="svg-canvas-container">
     <CanvasToolbar />
-    <FloatingSidemenu />
     <svg
-      viewBox="-50 -50 450 450"
+      :viewBox="viewBox"
+      preserveAspectRatio="xMidYMid meet"
       class="root-svg"
       :class="{ dragging: isDragging }"
       ref="svgRef"
@@ -117,19 +126,14 @@ const handleZoom = (evt: WheelEvent) => {
       @mouseleave="stopDragging"
       @wheel.prevent="handleZoom"
     >
-      <defs>
-        <pattern id="grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
-          <circle cx="2" cy="2" r="1" fill="#a0a0a0" />
-        </pattern>
-      </defs>
-
       <g :transform="`translate(${pan.x}, ${pan.y}) scale(${scale})`" ref="viewportRef">
+        <!-- Catches clicks on empty space to clear the selection. -->
         <rect
           x="-200000"
           y="-200000"
           width="400000"
           height="400000"
-          fill="url(#grid-pattern)"
+          fill="transparent"
           @click="selectSvg(null)"
         />
         
@@ -159,7 +163,6 @@ const handleZoom = (evt: WheelEvent) => {
         />
       </g>
     </svg>
-    <CanvasActionbar />
   </div>
 </template>
 
@@ -172,7 +175,11 @@ const handleZoom = (evt: WheelEvent) => {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: var(--color-background);
+
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-panel);
 }
 
 .root-svg {
@@ -190,9 +197,9 @@ const handleZoom = (evt: WheelEvent) => {
 
 .cutbed {
   fill: none;
-  stroke: var(--color-accent);
-  stroke-width: 1pt;
+  stroke: var(--color-cutbed);
+  stroke-width: 1.5px;
   vector-effect: non-scaling-stroke;
-  stroke-dasharray: 5 5;
+  stroke-dasharray: 6 6;
 }
 </style>

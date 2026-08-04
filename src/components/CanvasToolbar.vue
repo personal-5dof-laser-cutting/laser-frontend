@@ -1,20 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import AppIcon from '@/components/AppIcon.vue'
 import IconButton from '@/components/IconButton.vue'
 
 import { useProjectStore } from '@/stores/useProjectStore'
 import { useStore } from '@/stores/useStore'
 
-import uploadIconUrl from '@/assets/icons/upload_file.svg'
-import resetBoxIconUrl from '@/assets/icons/reset_focus.svg'
-import deleteIconUrl from '@/assets/icons/delete.svg'
-import copyIconUrl from '@/assets/icons/copy.svg'
-import downloadIconUrl from '@/assets/icons/download.svg'
+import uploadIcon from '@/assets/icons/upload_file.svg?raw'
+import resetBoxIcon from '@/assets/icons/reset_focus.svg?raw'
+import deleteIcon from '@/assets/icons/delete.svg?raw'
+import copyIcon from '@/assets/icons/copy.svg?raw'
+import downloadIcon from '@/assets/icons/download.svg?raw'
 
 const projectStore = useStore(useProjectStore)
-useProjectStore.getState()
-const svgs = computed(() => projectStore.value.svgs)
 const selectedId = computed(() => projectStore.value.selectedId)
 
 const handleUpload = (event: Event) => useProjectStore.getState().uploadSvg(event)
@@ -35,35 +34,34 @@ const removeActiveSVG = () => {
 <template>
   <div class="toolbar">
     <label class="icon-btn" title="Upload SVG">
-      <img :src="uploadIconUrl" class="btn-icon" alt="Upload Icon" />
+      <AppIcon :svg="uploadIcon" label="Upload SVG" />
       <input type="file" accept=".svg" @change="handleUpload" hidden />
     </label>
 
     <IconButton
       title="Reset Canvas"
       :action="handleReset"
-      :iconPath="resetBoxIconUrl"
-      alt="Reset
-    Canvas"
+      :icon="resetBoxIcon"
+      alt="Reset Canvas"
     />
     <IconButton
       title="Delete Element"
       :action="removeActiveSVG"
-      :iconPath="deleteIconUrl"
+      :icon="deleteIcon"
       alt="Delete Element"
       v-if="selectedId"
     />
     <IconButton
       title="Duplicate Element"
       :action="duplicateActiveSvg"
-      :iconPath="copyIconUrl"
+      :icon="copyIcon"
       alt="Duplicate Element"
       v-if="selectedId"
     />
     <IconButton
       title="Export Project"
       :action="handleExport"
-      :iconPath="downloadIconUrl"
+      :icon="downloadIcon"
       alt="Export Project"
     />
   </div>
@@ -80,28 +78,29 @@ const removeActiveSVG = () => {
   gap: var(--gap-mid);
 }
 
+/* Mirrors IconButton's styling; the upload control has to be a <label>
+   so it can wrap the hidden file input. */
 .icon-btn {
-  background-color: var(--color-background-soft);
-  border: 1px solid var(--color-border-panel);
-  border-radius: var(--border-radius-panel-element);
-  background-color: var(--color-background-panel);
-  color: var(--color-text);
-  cursor: pointer;
-  width: 48pt;
-  height: 48pt;
-  padding: 8pt;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 42px;
+  height: 42px;
+  font-size: 20px;
+
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease;
 }
 
 .icon-btn:hover {
-  border-color: var(--color-border-hover);
-}
-
-.btn-icon {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
 }
 </style>

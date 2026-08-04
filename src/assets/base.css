@@ -1,61 +1,53 @@
-/* color palette from <https://github.com/vuejs/theme> */
+/* color palette */
 :root {
-  --vt-c-dark-grey: #181818;
-  --vt-c-mid-grey: #1d1d1d;
-  --vt-c-light-grey: #353535;
-  --vt-c-lightest-grey: #545454;
+  --c-slate-900: #1e2939;
+  --c-slate-700: #3f4c60;
+  --c-slate-500: #64748b;
+  --c-slate-400: #94a3b8;
+  --c-slate-300: #cbd5e1;
+  --c-slate-200: #e4e9f0;
+  --c-slate-100: #f1f5f9;
+  --c-slate-50: #f8fafc;
+  --c-white: #ffffff;
 
-  --vt-c-white: #e3e3e3;
-  --vt-c-white-muted: #aaaaaa;
-
-  --vt-c-black: #323232;
-
-  --vt-c-orange: #f09e5a;
-  --vt-c-red: #f43551;
-  --vt-c-blue: #2f82e2;
-  --vt-c-green: #6ea41a;
-  --vt-c-cyan: #94d8b1;
+  --c-blue: #3b6fd4;
+  --c-red: #d64550;
 }
 
 /* semantic color variables for this project */
 :root {
-  --color-background: var(--vt-c-white);
-  --color-background-panel: var(--vt-c-light-grey);
-  --color-text-panel: var(--vt-c-white);
-  --color-background-panel-element: var(--vt-c-white-muted);
-  --color-border-panel: var(--vt-c-mid-grey);
+  --color-background: var(--c-slate-100);
+  --color-surface: var(--c-white);
+  --color-surface-muted: var(--c-slate-50);
+  --color-surface-hover: var(--c-slate-100);
 
-  --color-heading: var(--vt-c-dark-grey);
-  --color-text: var(--vt-c-black);
+  --color-border: var(--c-slate-200);
+  --color-border-strong: var(--c-slate-300);
 
-  --color-accent: var(--vt-c-orange);
+  --color-text: var(--c-slate-900);
+  --color-text-muted: var(--c-slate-500);
 
-  --gap-small: 5pt;
-  --gap-mid: 7pt;
-  --gap-large: 13pt;
+  --color-primary: #5f6b7f;
+  --color-primary-hover: #4e596b;
+  --color-on-primary: var(--c-white);
 
-  --padding-small: 7pt;
-  --padding-mid: 13pt;
+  --color-accent: var(--c-blue);
+  --color-cutbed: var(--c-slate-300);
+  --color-danger: var(--c-red);
 
-  --margin-small: 7pt;
-  --margin-mid: 13pt;
+  --radius-panel: 16px;
+  --radius-control: 10px;
 
-  --broder-radius-panel: 7pt;
-  --border-radius-panel-element: 5pt;
-}
+  --gap-mid: 10px;
+  --gap-large: 18px;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: var(--vt-c-dark-grey);
-    --color-background-panel: var(--vt-c-grey);
-    --color-background-panel-element: var(--vt-light-grey);
-    --color-border-panel: var(--vt-c-mid-grey);
+  --padding-small: 10px;
+  --padding-mid: 22px;
 
-    --color-heading: var(--vt-c-white-muted);
-    --color-text: var(--vt-c-white);
+  --margin-mid: 16px;
 
-    --color-accent: var(--vt-c-orange);
-  }
+  --shadow-panel: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+  --shadow-control: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 
 *,
@@ -69,9 +61,6 @@ body {
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-background);
-  transition:
-    color 0.5s,
-    background-color 0.5s;
   line-height: 1.6;
   font-family:
     Inter,

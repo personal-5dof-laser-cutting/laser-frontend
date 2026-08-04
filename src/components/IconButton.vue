@@ -1,40 +1,47 @@
 <script setup lang="ts">
+import AppIcon from '@/components/AppIcon.vue'
+
 defineProps<{
   title: string
   action: () => void
-  iconPath: string
+  icon: string
   alt: string
 }>()
 </script>
 
 <template>
   <button class="icon-btn" :title="title" @click="action">
-    <img :src="iconPath" class="btn-icon" :alt="alt" />
+    <AppIcon :svg="icon" :label="alt" />
   </button>
 </template>
 
 <style scoped>
 .icon-btn {
-  background-color: var(--color-background-soft);
-  border: 1px solid grey;
-  border-radius: 5px;
-  color: var(--color-text);
-  cursor: pointer;
-  width: 48pt;
-  height: 48pt;
-  padding: 8pt;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  font-size: 20px;
+
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease;
 }
 
 .icon-btn:hover {
-  border-color: var(--color-border-hover);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-border-strong);
 }
 
-.btn-icon {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+.icon-btn:active {
+  background-color: var(--color-border);
 }
 </style>

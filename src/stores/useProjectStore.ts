@@ -84,9 +84,6 @@ export const useProjectStore = createStore<ProjectStore>()(
               svgElement.removeAttribute('x')
               svgElement.removeAttribute('y')
 
-              const vbWidth = svgElement.viewBox?.baseVal?.width ?? 0
-              const vbHeight = svgElement.viewBox?.baseVal?.height ?? 0
-
               const w = svgElement.getAttribute('width')
               const h = svgElement.getAttribute('height')
 
