@@ -6,6 +6,7 @@ import { useCutterStore } from '@/stores/useCutterStore'
 import { useWebsocketStore } from '@/stores/useWebsocketStore'
 
 import type { Parameters, SVGData } from '@/types/websocket'
+import { useToast } from 'vue-toastification'
 
 interface ProjectState {
   svgs: SVGData[]
@@ -58,7 +59,7 @@ function unitToMm(value: string | null, dpi: number | null = null): number | nul
     case 'in': return num * 25.4
     case 'pt': return num * (25.4 / 72)
     case 'pc': return num * (25.4 / 6)
-    default: return dpi ? pxToMm(num, dpi) : null // px or unitless — not reliable and no dpi probided, caller must decide fallback
+    default: return dpi ? pxToMm(num, dpi) : null // px or unitless — not reliable and no dpi provided, caller must decide fallback
   }
 }
 
@@ -80,27 +81,47 @@ export const useProjectStore = createStore<ProjectStore>()(
             const doc = parser.parseFromString(text, 'image/svg+xml')
             const svgElement = doc.querySelector('svg')
 
+            const promptForDpi = (): number => {
+              let dpi: number
+              do {
+                dpi = parseFloat(prompt("Please enter the SVG's DPI:") || "")
+              } while (isNaN(dpi))
+              return dpi
+            }
+
             if (svgElement) {
               svgElement.removeAttribute('x')
               svgElement.removeAttribute('y')
 
+              const vbWidth = svgElement.viewBox?.baseVal?.width
+              const vbHeight = svgElement.viewBox?.baseVal?.height
+
               const w = svgElement.getAttribute('width')
               const h = svgElement.getAttribute('height')
 
-              let widthMm = unitToMm(w)
-              let heightMm = unitToMm(h)
+              const hasWidthHeight = Boolean(w && h)
+              const hasViewBox = Boolean(vbWidth && vbHeight)
 
-              if (!widthMm || !heightMm) {
-                let passedDPI: number
-                do {
-                  passedDPI = parseFloat(prompt("Please enter the SVG's DPI:") || "")
-                } while(isNaN(passedDPI))
-                  widthMm = unitToMm(w, passedDPI)
-                  heightMm = unitToMm(w, passedDPI)
+              if (!hasWidthHeight && !hasViewBox) {
+                useToast().error(
+                  "The uploaded SVG is invalid. Make sure it has a width and height set or a viewBox exists"
+                )
+                return
               }
 
-              if (w) svgElement.setAttribute('width', String(widthMm))
-              if (h) svgElement.setAttribute('height', String(heightMm))
+              let widthMm = hasWidthHeight ? unitToMm(w!) : null
+              let heightMm = hasWidthHeight ? unitToMm(h!) : null
+
+              if (widthMm == null || heightMm == null) {
+                const sourceWidth = hasWidthHeight ? w : String(vbWidth)
+                const sourceHeight = hasWidthHeight ? h : String(vbHeight)
+                const dpi = promptForDpi()
+                widthMm = unitToMm(sourceWidth, dpi) as number
+                heightMm = unitToMm(sourceHeight, dpi) as number
+              }
+
+              svgElement.setAttribute('width', String(widthMm))
+              svgElement.setAttribute('height', String(heightMm))
 
               const newSvg: SVGData = {
                 id: crypto.randomUUID(),
