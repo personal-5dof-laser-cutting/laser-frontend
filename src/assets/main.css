@@ -17,14 +17,61 @@ html {
 
   flex-grow: 1;
   overflow: hidden;
-
-  transition: 0.2s ease-out;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: var(--vt-c-cyan);
-  transition: 0.4s;
-  padding: 3px;
+/* Keep the number steppers permanently visible, matching the design spec. */
+input[type='number']::-webkit-inner-spin-button {
+  opacity: 1;
+}
+
+/* Bring vue-toastification's defaults in line with the light surfaces. */
+.Vue-Toastification__toast {
+  min-height: 0;
+  padding: 14px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-text-muted);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-panel);
+}
+
+.Vue-Toastification__toast--info {
+  border-left-color: var(--color-accent);
+}
+
+.Vue-Toastification__toast--error {
+  border-left-color: var(--color-danger);
+}
+
+.Vue-Toastification__toast-body {
+  font-family: inherit;
+}
+
+/* The default icon is white, which disappears on a light toast. */
+.Vue-Toastification__icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  fill: var(--color-text-muted);
+}
+
+.Vue-Toastification__toast--info .Vue-Toastification__icon {
+  fill: var(--color-accent);
+}
+
+.Vue-Toastification__toast--error .Vue-Toastification__icon {
+  fill: var(--color-danger);
+}
+
+.Vue-Toastification__close-button {
+  color: var(--color-text-muted);
+  opacity: 0.7;
+}
+
+.Vue-Toastification__progress-bar {
+  background: var(--color-border-strong);
 }

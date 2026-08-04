@@ -3,17 +3,12 @@ import { computed } from 'vue'
 import { useProjectStore } from '@/stores/useProjectStore'
 import { useStore } from '@/stores/useStore'
 
-// Assumes useCutterStore exposes:
-//   progress: number
-//   progressTotal: number
-// Adjust field names below if yours differ.
-
 const projectStore = useStore(useProjectStore)
 
 const percent = computed(() => {
   const total = projectStore.value.progressTotal
   const current = projectStore.value.progress
-  
+
   if (!total || total <= 0) return 0
   return Math.min(100, Math.round(((current || 0) / total) * 100))
 })
@@ -30,33 +25,41 @@ const percent = computed(() => {
 
 <style scoped>
 .progress-bar-wrapper {
-  position: fixed;
-  bottom: 24px;
+  position: absolute;
+  top: 22px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 20;
+
   display: flex;
   align-items: center;
   gap: 12px;
   width: 320px;
-  z-index: 1000;
+  padding: 10px 16px;
+
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-control);
 }
 
 .progress-bar-track {
   flex: 1;
-  height: 10px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 6px;
+  height: 8px;
+  background: var(--color-border);
+  border-radius: 999px;
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: #3b82f6;
+  background: var(--color-primary);
   transition: width 0.2s ease;
 }
 
 .progress-bar-label {
   font-size: 13px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   min-width: 36px;
   text-align: right;

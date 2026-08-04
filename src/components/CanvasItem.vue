@@ -152,22 +152,22 @@ const getRotationCenter = computed(() => {
 .selection-box {
   fill: none;
   stroke: var(--color-accent);
-  stroke-width: 1pt;
+  stroke-width: 1.5px;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 
 .handle-line {
   stroke: var(--color-accent);
-  stroke-width: 1pt;
+  stroke-width: 1.5px;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 
 .rotate-handle {
-  fill: var(--color-background);
+  fill: var(--color-surface);
   stroke: var(--color-accent);
-  stroke-width: 5pt;
+  stroke-width: 2px;
   vector-effect: non-scaling-stroke;
   cursor: alias;
 }
