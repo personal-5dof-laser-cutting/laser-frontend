@@ -66,8 +66,7 @@ watch(lines, () => {
 .terminal {
   position: fixed;
   bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 2%;
   z-index: 2000;
   display: flex;
   flex-direction: column;
