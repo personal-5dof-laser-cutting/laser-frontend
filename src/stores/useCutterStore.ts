@@ -21,12 +21,13 @@ type MaterialData = {
   id: string
   label: string
   standard_thickness: number
+  suggested_cutspeed: number
 }
 
 interface CutterState {
   axes: AxesState
   cutbed: CutbedState
-  materials: MaterialData[]
+  materials: Record<string, MaterialData>
   activeMaterialId: string
   toolheadPosition: ToolheadState
 }
@@ -34,7 +35,7 @@ interface CutterState {
 interface CutterActions {
   setAxes: (axes: Partial<Record<AxisLabel, Partial<AxisData>>>) => void
   setCutbed: (cutbed: Partial<CutbedState>) => void
-  setMaterial: (material: Partial<MaterialData>) => void
+  setMaterial: (material: MaterialData) => void
   setActiveMaterial: (material_id: string) => void
   setToolheadPosition: (position: ToolheadState) => void
 
@@ -44,16 +45,19 @@ interface CutterActions {
   updateMaterial: (material_id: string, updates: Partial<MaterialData>) => void
   deleteMaterial: (material_id: string) => void
 
-
+  getActiveMaterial: () => MaterialData | null
 }
 
 type CutterStore = CutterState & CutterActions
 const materialResponse = await fetch("http://127.0.0.1:8000/get_materials")
-let backendMaterials = []
+let backendMaterials: Record<string, MaterialData> = {}
 if (!materialResponse.ok) {
   console.error(materialResponse.statusText)
 } else {
-  backendMaterials = await materialResponse.json()
+  let materialsArray = await materialResponse.json()
+  backendMaterials = Object.fromEntries(
+    materialsArray.map((material: MaterialData) => [material.id, material])
+  )
 }
 
 const cutbedResponse = await fetch("http://127.0.0.1:8000/get_cutbed_dimensions")
@@ -80,14 +84,14 @@ export const INITIAL_STATE: CutterState = {
     height: 15,
   },
   materials: backendMaterials,
-  activeMaterialId: backendMaterials[0].id,
+  activeMaterialId: Object.keys(backendMaterials)[0] || '',
   toolheadPosition: {x: 0, y: cutbed_height}
 }
 
 export const useCutterStore = createStore<CutterStore>()(
   devtools(
     persist(
-      immer((set) => ({
+      immer((set, get) => ({
         ...INITIAL_STATE,
 
         updateAxis: (axis, updates) =>
@@ -116,17 +120,12 @@ export const useCutterStore = createStore<CutterStore>()(
 
         setMaterial: (material) =>
           set((state) => {
-            const newMaterial: MaterialData = {
-              id: material.id || crypto.randomUUID(),
-              label: material.label || 'New Material',
-              standard_thickness: material.standard_thickness || 5,
-            }
-            state.materials.push(newMaterial)
+            state.materials[material.id] = material
           }),
 
         updateMaterial: (material_id, updates) =>
           set((state) => {
-            const materialToUpdate = state.materials.find((m) => m.id === material_id)
+            const materialToUpdate = state.materials[material_id]
             if (materialToUpdate) {
               Object.assign(materialToUpdate, updates)
             }
@@ -134,11 +133,7 @@ export const useCutterStore = createStore<CutterStore>()(
 
         deleteMaterial: (material_id) =>
           set((state) => {
-            state.materials = state.materials.filter((m) => m.id !== material_id)
-
-            if (state.activeMaterialId === material_id) {
-              state.activeMaterialId = ''
-            }
+            delete state.materials[material_id]
           }),
 
         setActiveMaterial: (material_id) =>
@@ -150,7 +145,12 @@ export const useCutterStore = createStore<CutterStore>()(
         setToolheadPosition: (position: ToolheadState) =>
           set((state) => {
             state.toolheadPosition = {x: position.x, y: position.y}
-          })
+          }),
+
+        getActiveMaterial: () => {
+          const state = get()
+          return state.materials[state.activeMaterialId] || null
+        },
       })),
       {
         name: 'LaserFrontend-Cutter-Storage',

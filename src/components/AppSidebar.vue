@@ -18,6 +18,7 @@ const materials = computed(() => cutterStore.value.materials)
 const activeMaterialId = computed(() => cutterStore.value.activeMaterialId)
 
 const materialThickness = ref(7)
+const laserPower = ref(100)
 const cutSpeed = ref(20)
 const activateLaser = ref(true)
 const optimize = ref(true)
@@ -29,6 +30,7 @@ const submitJob = () => {
     material_thickness: materialThickness.value,
     dpi: 72,
     cut_speed: cutSpeed.value,
+    laser_power: laserPower.value / 100,
     laser_off: !activateLaser.value,
     optimize: optimize.value,
   })
@@ -47,6 +49,11 @@ const abortCut = () => {
 const handleMaterialChange = (event: Event) => {
   const target: HTMLSelectElement = event.target as HTMLSelectElement
   cutterStore.value.setActiveMaterial(target.value)
+  const materialData = cutterStore.value.getActiveMaterial()
+  if (materialData) {
+    cutSpeed.value = materialData.suggested_cutspeed
+    laserPower.value = 100
+  }
 }
 </script>
 
@@ -63,7 +70,7 @@ const handleMaterialChange = (event: Event) => {
           :value="activeMaterialId"
           @change="handleMaterialChange"
         >
-          <option v-for="item in materials" :key="item.id" :value="item.label">
+          <option v-for="item in materials" :key="item.id" :value="item.id">
             {{ item.label }}
           </option>
         </select>
@@ -73,6 +80,13 @@ const handleMaterialChange = (event: Event) => {
         <div class="field">
           <label class="field-label" for="material-height">Thickness (mm)</label>
           <input id="material-height" class="control" type="number" v-model="materialThickness" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="laser-power">Laser power (%)</label>
+          <input id="laser-power" class="control" type="number" min="0" max="100" step="any" v-model="laserPower" />
         </div>
 
         <div class="field">

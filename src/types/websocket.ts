@@ -3,6 +3,7 @@ export type Parameters = {
   material_thickness: number
   dpi: number
   cut_speed: number
+  laser_power: number
   laser_off: boolean
   optimize: boolean
 }
