@@ -19,7 +19,7 @@ const activeMaterialId = computed(() => cutterStore.value.activeMaterialId)
 
 const materialThickness = ref(7)
 const cutSpeed = ref(20)
-const laserOff = ref(false)
+const activateLaser = ref(true)
 const optimize = ref(true)
 
 const submitJob = () => {
@@ -29,7 +29,7 @@ const submitJob = () => {
     material_thickness: materialThickness.value,
     dpi: 72,
     cut_speed: cutSpeed.value,
-    laser_off: laserOff.value,
+    laser_off: !activateLaser.value,
     optimize: optimize.value,
   })
 }
@@ -82,9 +82,9 @@ const handleMaterialChange = (event: Event) => {
       </div>
 
       <div class="options">
-        <label class="option" for="laser-off">
-          <input type="checkbox" name="laser-off" id="laser-off" v-model="laserOff" />
-          <span>Laser off</span>
+        <label class="option" for="activatae-laser">
+          <input type="checkbox" name="activatae-laser" id="activatae-laser" v-model="activateLaser" />
+          <span>Activate laser</span>
         </label>
         <label class="option" for="optimize">
           <input type="checkbox" name="optimize" id="optimize" v-model="optimize" />
